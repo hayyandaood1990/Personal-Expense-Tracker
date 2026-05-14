@@ -4,7 +4,13 @@ frappe.ui.form.on("Expense Entry", {
 
 		frm.add_custom_button(__("Fetch Exchange Rate"), () => {
 			frm.trigger("fetch_exchange_rate");
-		});
+		}, __("Exchange Rate"));
+
+		if (can_sync_live_rates()) {
+			frm.add_custom_button(__("Sync SP Today Rates"), () => {
+				sync_sp_today_exchange_rates(frm);
+			}, __("Exchange Rate"));
+		}
 
 		frm.trigger("show_base_amount_indicator");
 	},
@@ -91,3 +97,27 @@ frappe.ui.form.on("Expense Entry", {
 		);
 	},
 });
+
+function can_sync_live_rates() {
+	return frappe.user.has_role("Expense Manager") || frappe.user.has_role("System Manager");
+}
+
+function sync_sp_today_exchange_rates(frm) {
+	frappe.call({
+		method: "personal_expense_tracker.api.sync_exchange_rates_from_sp_today",
+		args: {
+			effective_date: frm.doc.posting_date || frappe.datetime.nowdate(),
+			rate_type: "sell",
+		},
+		freeze: true,
+		freeze_message: __("Syncing SP Today exchange rates..."),
+		callback(r) {
+			const updated_rates = (r.message && r.message.updated_rates) || [];
+			frappe.show_alert({
+				message: __("{0} SP Today exchange rates synced.", [updated_rates.length]),
+				indicator: "green",
+			});
+			frm.trigger("fetch_exchange_rate");
+		},
+	});
+}
