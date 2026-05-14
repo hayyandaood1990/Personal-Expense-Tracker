@@ -1,0 +1,39 @@
+[
+ {
+  "doctype": "Dashboard",
+  "name": "Personal Expenses",
+  "dashboard_name": "Personal Expenses",
+  "is_default": 0,
+  "is_standard": 0,
+  "module": "Personal Expense Tracker",
+  "chart_options": "{}",
+  "charts": [
+   {
+    "chart": "Monthly Expenses",
+    "width": "Full"
+   },
+   {
+    "chart": "Expenses by Category",
+    "width": "Half"
+   },
+   {
+    "chart": "Expenses by Currency",
+    "width": "Half"
+   }
+  ],
+  "cards": [
+   {
+    "card": "This Month Expenses"
+   },
+   {
+    "card": "Today Expenses"
+   },
+   {
+    "card": "Top Category"
+   },
+   {
+    "card": "Budget Usage"
+   }
+  ]
+ }
+]

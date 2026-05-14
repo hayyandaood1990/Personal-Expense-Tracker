@@ -1,0 +1,58 @@
+[
+ {
+  "doctype": "Number Card",
+  "name": "This Month Expenses",
+  "label": "This Month Expenses",
+  "type": "Custom",
+  "method": "personal_expense_tracker.api.get_this_month_expenses_card",
+  "document_type": "Expense Entry",
+  "is_public": 1,
+  "is_standard": 0,
+  "module": "Personal Expense Tracker",
+  "show_full_number": 1,
+  "show_percentage_stats": 0,
+  "color": "#2f80ed"
+ },
+ {
+  "doctype": "Number Card",
+  "name": "Today Expenses",
+  "label": "Today Expenses",
+  "type": "Custom",
+  "method": "personal_expense_tracker.api.get_today_expenses_card",
+  "document_type": "Expense Entry",
+  "is_public": 1,
+  "is_standard": 0,
+  "module": "Personal Expense Tracker",
+  "show_full_number": 1,
+  "show_percentage_stats": 0,
+  "color": "#27ae60"
+ },
+ {
+  "doctype": "Number Card",
+  "name": "Top Category",
+  "label": "Top Category",
+  "type": "Custom",
+  "method": "personal_expense_tracker.api.get_top_category_card",
+  "document_type": "Expense Entry",
+  "is_public": 1,
+  "is_standard": 0,
+  "module": "Personal Expense Tracker",
+  "show_full_number": 1,
+  "show_percentage_stats": 0,
+  "color": "#9b51e0"
+ },
+ {
+  "doctype": "Number Card",
+  "name": "Budget Usage",
+  "label": "Budget Usage",
+  "type": "Custom",
+  "method": "personal_expense_tracker.api.get_budget_usage_card",
+  "document_type": "Expense Entry",
+  "is_public": 1,
+  "is_standard": 0,
+  "module": "Personal Expense Tracker",
+  "show_full_number": 1,
+  "show_percentage_stats": 0,
+  "color": "#f2994a"
+ }
+]

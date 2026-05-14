@@ -1,0 +1,184 @@
+{
+ "app": "personal_expense_tracker",
+ "charts": [
+  {
+   "chart_name": "Monthly Expenses",
+   "label": "Monthly Expenses"
+  },
+  {
+   "chart_name": "Expenses by Category",
+   "label": "Expenses by Category"
+  },
+  {
+   "chart_name": "Expenses by Currency",
+   "label": "Expenses by Currency"
+  }
+ ],
+ "content": "[{\"id\":\"pet-card-this-month\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"This Month Expenses\",\"col\":3}},{\"id\":\"pet-card-today\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today Expenses\",\"col\":3}},{\"id\":\"pet-card-top-category\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Top Category\",\"col\":3}},{\"id\":\"pet-card-budget\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Budget Usage\",\"col\":3}},{\"id\":\"pet-chart-monthly\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Expenses\",\"col\":12}},{\"id\":\"pet-chart-category\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Category\",\"col\":6}},{\"id\":\"pet-chart-currency\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Currency\",\"col\":6}},{\"id\":\"pet-header-links\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Expense Tracking</b></span>\",\"col\":12}},{\"id\":\"pet-card-entry\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Entry\",\"col\":3}},{\"id\":\"pet-card-category\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Category\",\"col\":3}},{\"id\":\"pet-card-budget-link\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Monthly Budget\",\"col\":3}},{\"id\":\"pet-card-rate\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Currency Exchange Rate\",\"col\":3}}]",
+ "creation": "2026-05-14 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "wallet",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Personal Expenses",
+ "links": [
+  {
+   "type": "Card Break",
+   "label": "Masters",
+   "link_count": 2,
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Expense Category",
+   "link_type": "DocType",
+   "link_to": "Expense Category",
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Currency Exchange Rate",
+   "link_type": "DocType",
+   "link_to": "Currency Exchange Rate",
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Transactions",
+   "link_count": 2,
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Expense Entry",
+   "link_type": "DocType",
+   "link_to": "Expense Entry",
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Monthly Budget",
+   "link_type": "DocType",
+   "link_to": "Monthly Budget",
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Card Break",
+   "label": "Reports",
+   "link_count": 3,
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Monthly Expense Summary",
+   "link_type": "Report",
+   "link_to": "Monthly Expense Summary",
+   "is_query_report": 1,
+   "hidden": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Category Expense Summary",
+   "link_type": "Report",
+   "link_to": "Category Expense Summary",
+   "is_query_report": 1,
+   "hidden": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Currency Exposure Report",
+   "link_type": "Report",
+   "link_to": "Currency Exposure Report",
+   "is_query_report": 1,
+   "hidden": 0,
+   "onboard": 0
+  }
+ ],
+ "modified": "2026-05-14 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Personal Expense Tracker",
+ "name": "Personal Expenses",
+ "number_cards": [
+  {
+   "number_card_name": "This Month Expenses",
+   "label": "This Month Expenses"
+  },
+  {
+   "number_card_name": "Today Expenses",
+   "label": "Today Expenses"
+  },
+  {
+   "number_card_name": "Top Category",
+   "label": "Top Category"
+  },
+  {
+   "number_card_name": "Budget Usage",
+   "label": "Budget Usage"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [
+  {
+   "role": "Expense User"
+  },
+  {
+   "role": "Expense Manager"
+  }
+ ],
+ "sequence_id": 1.0,
+ "shortcuts": [
+  {
+   "type": "DocType",
+   "link_to": "Expense Entry",
+   "label": "Expense Entry",
+   "doc_view": "List",
+   "color": "Blue"
+  },
+  {
+   "type": "DocType",
+   "link_to": "Expense Category",
+   "label": "Expense Category",
+   "doc_view": "List",
+   "color": "Green"
+  },
+  {
+   "type": "DocType",
+   "link_to": "Monthly Budget",
+   "label": "Monthly Budget",
+   "doc_view": "List",
+   "color": "Orange"
+  },
+  {
+   "type": "DocType",
+   "link_to": "Currency Exchange Rate",
+   "label": "Currency Exchange Rate",
+   "doc_view": "List",
+   "color": "Purple"
+  }
+ ],
+ "title": "Personal Expenses",
+ "type": "Workspace"
+}
