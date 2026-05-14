@@ -7,6 +7,7 @@ A Frappe Framework v16 app for personal expense tracking, monthly budgets, categ
 - Expense categories with active/inactive status and monthly budget reference
 - Expense entries in SYP, USD, and EUR
 - Currency exchange rates with effective dates
+- Live exchange-rate sync for SYP, USD, and EUR
 - Monthly budgets per user, month, year, and category
 - Expense User and Expense Manager roles
 - Permission filters so normal users only see their own expenses and budgets
@@ -40,6 +41,46 @@ To reload dummy data for a user:
 
 ```bash
 bench --site your-site-name execute personal_expense_tracker.install.create_dummy_data --kwargs "{'user': 'user@example.com'}"
+```
+
+## Live Exchange Rates
+
+Expense Managers can sync live exchange rates from SP Today:
+
+- Open an Expense Entry and click Exchange Rate > Sync SP Today Rates
+- Or open any Currency Exchange Rate and click Sync SP Today Rates
+
+The SP Today sync reads the public USD and EUR pages and stores the selected sell rate by default:
+
+```text
+https://sp-today.com/en/currency/us-dollar
+https://sp-today.com/en/currency/euro
+```
+
+To use buy or midpoint rates instead of sell rates:
+
+```bash
+bench --site your-site-name set-config personal_expense_tracker_sp_today_rate_type "buy"
+bench --site your-site-name clear-cache
+```
+
+You can also sync SP Today rates from the command line:
+
+```bash
+bench --site your-site-name execute personal_expense_tracker.api.sync_exchange_rates_from_sp_today
+```
+
+The generic JSON API sync is still available. To use another compatible API endpoint, set this site config value. The URL may include `{base_currency}`:
+
+```bash
+bench --site your-site-name set-config personal_expense_tracker_exchange_rate_api_url "https://open.er-api.com/v6/latest/{base_currency}"
+bench --site your-site-name clear-cache
+```
+
+Then run:
+
+```bash
+bench --site your-site-name execute personal_expense_tracker.api.sync_exchange_rates_from_api
 ```
 
 ## Reports
