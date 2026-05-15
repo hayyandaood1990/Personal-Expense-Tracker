@@ -4,3 +4,4 @@
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
+personal_expense_tracker.patches.add_website_dashboard_shortcut
