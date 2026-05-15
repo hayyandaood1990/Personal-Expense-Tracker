@@ -14,6 +14,7 @@ A Frappe Framework v16 app for personal expense tracking, monthly budgets, categ
 - Client-side exchange-rate fetching and base-currency calculation
 - Script reports for monthly, category, and currency exposure summaries
 - Personal Expenses workspace and dashboard widgets
+- Website dashboard at `/expense-tracker`
 - Dummy categories, exchange rates, budgets, and sample expenses
 
 ## Installation
@@ -88,6 +89,20 @@ bench --site your-site-name execute personal_expense_tracker.api.sync_exchange_r
 - Monthly Expense Summary
 - Category Expense Summary
 - Currency Exposure Report
+
+## Website Dashboard
+
+Open the website dashboard here after logging in:
+
+```text
+https://your-site/expense-tracker
+```
+
+For the local development site:
+
+```text
+https://developer-test/expense-tracker
+```
 
 ## License
 

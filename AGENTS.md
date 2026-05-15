@@ -25,6 +25,7 @@ This is a Frappe app for personal expense tracking. It lets users record expense
   - `https://sp-today.com/en/currency/euro`
 - Generic JSON exchange-rate API sync is also available for future API providers.
 - Personal Expenses workspace with number cards, charts, and shortcuts.
+- Website dashboard route at `/expense-tracker`.
 - Script reports for monthly summary, category summary, and currency exposure.
 - Dummy data for categories, exchange rates, budgets, and sample expenses.
 
@@ -200,6 +201,22 @@ Charts:
 
 Known fix:
 - `get_budget_usage_card` should calculate all visible budgets/expenses for Expense Managers, but only the current user's data for normal users.
+
+## Website Dashboard
+
+Route:
+- `/expense-tracker`
+
+Files:
+- `personal_expense_tracker/www/expense-tracker.html`
+- `personal_expense_tracker/www/expense_tracker.py`
+- `personal_expense_tracker/public/css/expense_tracker_web.css`
+- `personal_expense_tracker/public/js/expense_tracker_web.js`
+
+Behavior:
+- Requires login and redirects guests to `/login?redirect-to=/expense-tracker`.
+- Reads live Expense Entry, Monthly Budget, category, currency, and recent expense data.
+- Shows a full website dashboard with animated canvas background, metric cards, monthly chart, category donut, currency exposure bars, budget pulse, and recent expense links.
 
 ## Dummy Data
 

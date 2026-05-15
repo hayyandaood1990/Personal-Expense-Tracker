@@ -1,0 +1,147 @@
+{% extends "templates/web.html" %}
+
+{% block title %}{{ _("Personal Expense Tracker") }}{% endblock %}
+
+{% block page_content %}
+<link rel="stylesheet" href="/assets/personal_expense_tracker/css/expense_tracker_web.css">
+
+<main class="pet-web-shell">
+	<canvas id="pet-flow-field" class="pet-flow-field" aria-hidden="true"></canvas>
+
+	<section class="pet-dashboard">
+		<header class="pet-hero">
+			<div>
+				<p class="pet-kicker">{{ page_data.period_label }}</p>
+				<h1>{{ _("Personal Expense Tracker") }}</h1>
+				<p class="pet-hero-copy">
+					{{ _("A living view of spending, budgets, categories, and currency exposure.") }}
+				</p>
+			</div>
+			<div class="pet-actions">
+				<a class="pet-button pet-button-primary" href="{{ expense_entry_url }}">{{ _("Expenses") }}</a>
+				<a class="pet-button" href="{{ monthly_budget_url }}">{{ _("Budgets") }}</a>
+				<a class="pet-button" href="{{ desk_url }}">{{ _("Workspace") }}</a>
+			</div>
+		</header>
+
+		<section class="pet-metrics" aria-label="{{ _('Expense overview') }}">
+			<article class="pet-card pet-metric pet-accent-blue">
+				<span>{{ _("This Month") }}</span>
+				<strong>{{ page_data.month_total_display }}</strong>
+				<small>{{ page_data.entry_count }} {{ _("entries") }}</small>
+			</article>
+			<article class="pet-card pet-metric pet-accent-green">
+				<span>{{ _("Today") }}</span>
+				<strong>{{ page_data.today_total_display }}</strong>
+				<small>{{ _("Base currency") }} {{ page_data.base_currency }}</small>
+			</article>
+			<article class="pet-card pet-metric pet-accent-pink">
+				<span>{{ _("Top Category") }}</span>
+				<strong>{{ page_data.top_category.label }}</strong>
+				<small>{{ page_data.top_category.display }}</small>
+			</article>
+			<article class="pet-card pet-metric pet-accent-gold">
+				<span>{{ _("Budget Usage") }}</span>
+				<strong>{{ page_data.budget.usage_percent }}%</strong>
+				<small>{{ page_data.budget.remaining_display }} {{ _("left") }}</small>
+			</article>
+		</section>
+
+		<section class="pet-grid">
+			<article class="pet-card pet-panel pet-panel-wide">
+				<div class="pet-panel-header">
+					<div>
+						<span>{{ _("Year Flow") }}</span>
+						<h2>{{ _("Monthly Expenses") }}</h2>
+					</div>
+					<strong>{{ page_data.month_total_display }}</strong>
+				</div>
+				<div class="pet-chart-frame">
+					<canvas id="pet-monthly-chart"></canvas>
+				</div>
+			</article>
+
+			<article class="pet-card pet-panel">
+				<div class="pet-panel-header">
+					<div>
+						<span>{{ _("Shape") }}</span>
+						<h2>{{ _("Categories") }}</h2>
+					</div>
+				</div>
+				<div class="pet-donut-layout">
+					<canvas id="pet-category-chart"></canvas>
+					<div id="pet-category-list" class="pet-legend"></div>
+				</div>
+			</article>
+
+			<article class="pet-card pet-panel">
+				<div class="pet-panel-header">
+					<div>
+						<span>{{ _("Exposure") }}</span>
+						<h2>{{ _("Currencies") }}</h2>
+					</div>
+				</div>
+				<div id="pet-currency-bars" class="pet-bars"></div>
+			</article>
+		</section>
+
+		<section class="pet-bottom-grid">
+			<article class="pet-card pet-budget-card">
+				<div class="pet-panel-header">
+					<div>
+						<span>{{ _("Budget") }}</span>
+						<h2>{{ _("Monthly Pulse") }}</h2>
+					</div>
+					<strong>{{ page_data.budget.usage_percent }}%</strong>
+				</div>
+				<div class="pet-progress">
+					<div style="width: {{ page_data.budget.usage_width }}%"></div>
+				</div>
+				<div class="pet-budget-numbers">
+					<div>
+						<span>{{ _("Budget") }}</span>
+						<strong>{{ page_data.budget.total_display }}</strong>
+					</div>
+					<div>
+						<span>{{ _("Spent") }}</span>
+						<strong>{{ page_data.budget.spent_display }}</strong>
+					</div>
+					<div>
+						<span>{{ _("Remaining") }}</span>
+						<strong>{{ page_data.budget.remaining_display }}</strong>
+					</div>
+				</div>
+			</article>
+
+			<article class="pet-card pet-recent-card">
+				<div class="pet-panel-header">
+					<div>
+						<span>{{ _("Ledger") }}</span>
+						<h2>{{ _("Recent Expenses") }}</h2>
+					</div>
+					<a href="{{ expense_entry_url }}">{{ _("View All") }}</a>
+				</div>
+				<div class="pet-recent-list">
+					{% for row in page_data.recent_expenses %}
+					<a class="pet-recent-row" href="{{ row.url }}">
+						<div>
+							<strong>{{ row.category }}</strong>
+							<span>{{ row.description or row.name }}</span>
+						</div>
+						<div>
+							<strong>{{ row.amount }}</strong>
+							<span>{{ row.base_amount }}</span>
+						</div>
+					</a>
+					{% else %}
+					<div class="pet-empty-state">{{ _("No expenses yet.") }}</div>
+					{% endfor %}
+				</div>
+			</article>
+		</section>
+	</section>
+</main>
+
+<script id="pet-dashboard-data" type="application/json">{{ page_data_json | safe }}</script>
+<script src="/assets/personal_expense_tracker/js/expense_tracker_web.js"></script>
+{% endblock %}
