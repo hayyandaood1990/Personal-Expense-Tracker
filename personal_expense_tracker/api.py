@@ -357,12 +357,58 @@ def get_expense_rows(user=None, from_date=None, to_date=None, category=None, cur
 	)
 
 
+def get_income_rows(user=None, from_date=None, to_date=None, income_source=None, currency=None):
+	filters = []
+	resolved_user = resolve_user_filter(user)
+	if resolved_user:
+		filters.append(["user", "=", resolved_user])
+	if from_date:
+		filters.append(["posting_date", ">=", getdate(from_date)])
+	if to_date:
+		filters.append(["posting_date", "<=", getdate(to_date)])
+	if income_source:
+		filters.append(["income_source", "=", income_source])
+	if currency:
+		filters.append(["currency", "=", currency])
+
+	return frappe.get_all(
+		"Income Entry",
+		filters=filters,
+		fields=[
+			"name",
+			"posting_date",
+			"user",
+			"income_source",
+			"description",
+			"amount",
+			"currency",
+			"exchange_rate_to_base",
+			"base_currency",
+			"income_in_base_currency",
+		],
+		order_by="posting_date asc, creation asc",
+	)
+
+
 def get_total_in_currency(rows, target_currency=BASE_CURRENCY):
 	validate_supported_currency(target_currency)
 	total = 0
 	for row in rows:
 		total += convert_amount(
 			row.amount_in_base_currency,
+			row.base_currency or BASE_CURRENCY,
+			target_currency,
+			row.posting_date,
+		)
+	return flt(total)
+
+
+def get_total_income_in_currency(rows, target_currency=BASE_CURRENCY):
+	validate_supported_currency(target_currency)
+	total = 0
+	for row in rows:
+		total += convert_amount(
+			row.income_in_base_currency,
 			row.base_currency or BASE_CURRENCY,
 			target_currency,
 			row.posting_date,
@@ -398,6 +444,33 @@ def get_expense_summary(user=None, from_date=None, to_date=None, currency=BASE_C
 
 
 @frappe.whitelist()
+def get_income_summary(user=None, from_date=None, to_date=None, currency=BASE_CURRENCY):
+	validate_supported_currency(currency)
+	rows = get_income_rows(user=user, from_date=from_date, to_date=to_date)
+	total = get_total_income_in_currency(rows, currency)
+
+	by_source = defaultdict(float)
+	by_currency = defaultdict(float)
+	for row in rows:
+		converted_amount = convert_amount(
+			row.income_in_base_currency,
+			row.base_currency or BASE_CURRENCY,
+			currency,
+			row.posting_date,
+		)
+		by_source[row.income_source] += converted_amount
+		by_currency[row.currency] += flt(row.amount)
+
+	return {
+		"currency": currency,
+		"total_income": total,
+		"number_of_entries": len(rows),
+		"by_source": dict(by_source),
+		"by_currency": dict(by_currency),
+	}
+
+
+@frappe.whitelist()
 def get_monthly_expense_chart(year=None, user=None):
 	year = cint(year) or getdate(today()).year
 	start_date = f"{year}-01-01"
@@ -417,7 +490,6 @@ def get_monthly_expense_chart(year=None, user=None):
 	return {
 		"data": {"labels": list(MONTHS), "datasets": [{"name": _("Expenses"), "values": values}]},
 		"type": "line",
-		"fieldtype": "Currency",
 	}
 
 
@@ -440,7 +512,6 @@ def get_category_expense_chart(from_date=None, to_date=None, user=None):
 			"datasets": [{"name": _("Expenses"), "values": [row[1] for row in ordered]}],
 		},
 		"type": "donut",
-		"fieldtype": "Currency",
 	}
 
 
@@ -475,15 +546,22 @@ def get_monthly_budget_status(user=None, month=None, year=None, category=None, b
 		category=budget.category,
 	)
 	spent = get_total_in_currency(rows, BASE_CURRENCY)
+	income_rows = get_income_rows(user=budget.user, from_date=from_date, to_date=to_date)
+	total_income = get_total_income_in_currency(income_rows, BASE_CURRENCY)
 	budget_amount = flt(budget.budget_in_base_currency)
 	remaining = budget_amount - spent
 	usage_percent = (spent / budget_amount * 100) if budget_amount else 0
+	income_remaining = total_income - spent
+	income_usage_percent = (spent / total_income * 100) if total_income else 0
 
 	return {
 		"budget": budget_amount,
 		"spent": spent,
 		"remaining": remaining,
 		"usage_percent": usage_percent,
+		"total_income": total_income,
+		"income_remaining": income_remaining,
+		"income_usage_percent": income_usage_percent,
 		"currency": BASE_CURRENCY,
 	}
 
@@ -538,6 +616,8 @@ def get_budget_usage_card(filters=None):
 	total_budget = sum(flt(row.budget_in_base_currency) for row in budgets)
 	from_date, to_date = get_month_date_range(month, current.year)
 	rows = get_expense_rows(user=user, from_date=from_date, to_date=to_date)
+	income_rows = get_income_rows(user=user, from_date=from_date, to_date=to_date)
 	spent = get_total_in_currency(rows, BASE_CURRENCY)
-	usage = (spent / total_budget * 100) if total_budget else 0
+	total_income = get_total_income_in_currency(income_rows, BASE_CURRENCY)
+	usage = (spent / total_income * 100) if total_income else 0
 	return {"value": flt(usage, 3), "fieldtype": "Percent"}

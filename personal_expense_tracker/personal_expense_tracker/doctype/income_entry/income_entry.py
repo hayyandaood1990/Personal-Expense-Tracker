@@ -9,7 +9,7 @@ from frappe.utils import flt, getdate, today
 from personal_expense_tracker.utils import SUPPORTED_CURRENCIES, is_expense_manager
 
 
-class ExpenseEntry(Document):
+class IncomeEntry(Document):
 	def before_validate(self):
 		if not self.user and frappe.session.user != "Guest":
 			self.user = frappe.session.user
@@ -17,20 +17,19 @@ class ExpenseEntry(Document):
 		if self.currency and self.base_currency and self.currency == self.base_currency:
 			self.exchange_rate_to_base = 1
 
-		self.calculate_amount_in_base_currency()
+		self.calculate_income_in_base_currency()
 
 	def validate(self):
 		self.validate_amount()
 		self.validate_currencies()
 		self.validate_exchange_rate()
 		self.validate_posting_date()
-		self.validate_category_budget_period()
 		self.validate_user_access()
-		self.calculate_amount_in_base_currency()
+		self.calculate_income_in_base_currency()
 
 	def validate_amount(self):
 		if flt(self.amount) <= 0:
-			frappe.throw(_("Amount must be greater than zero."))
+			frappe.throw(_("Income Amount must be greater than zero."))
 
 	def validate_currencies(self):
 		for fieldname, label in (("currency", _("Currency")), ("base_currency", _("Base Currency"))):
@@ -48,41 +47,14 @@ class ExpenseEntry(Document):
 
 	def validate_posting_date(self):
 		if getdate(self.posting_date) > getdate(today()) and not is_expense_manager():
-			frappe.throw(_("Only users with the Expense Manager role can enter future dated expenses."))
+			frappe.throw(_("Only users with the Expense Manager role can enter future dated income."))
 
 	def validate_user_access(self):
 		if is_expense_manager() or frappe.session.user == "Administrator":
 			return
 
 		if self.user != frappe.session.user:
-			frappe.throw(_("You can only create or update Expense Entries for your own user."))
+			frappe.throw(_("You can only create or update Income Entries for your own user."))
 
-	def validate_category_budget_period(self):
-		if not self.category or not self.posting_date:
-			return
-
-		category = frappe.db.get_value(
-			"Expense Category",
-			self.category,
-			["budget_from_date", "budget_to_date"],
-			as_dict=True,
-		)
-		if not category:
-			return
-
-		posting_date = getdate(self.posting_date)
-		if category.budget_from_date and posting_date < getdate(category.budget_from_date):
-			frappe.throw(
-				_("Category {0} can only be used from {1}.").format(
-					self.category, category.budget_from_date
-				)
-			)
-		if category.budget_to_date and posting_date > getdate(category.budget_to_date):
-			frappe.throw(
-				_("Category {0} can only be used until {1}.").format(
-					self.category, category.budget_to_date
-				)
-			)
-
-	def calculate_amount_in_base_currency(self):
-		self.amount_in_base_currency = flt(self.amount) * flt(self.exchange_rate_to_base)
+	def calculate_income_in_base_currency(self):
+		self.income_in_base_currency = flt(self.amount) * flt(self.exchange_rate_to_base)

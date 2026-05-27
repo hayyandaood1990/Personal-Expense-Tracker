@@ -3,6 +3,7 @@
 	if (!dataElement) return;
 
 	const data = JSON.parse(dataElement.textContent || "{}");
+	const translations = data.translations || {};
 	const palette = ["#62a8ff", "#ff6f9f", "#4fd18b", "#f5b84b", "#5eead4", "#c084fc", "#f97316"];
 
 	startFlowField();
@@ -189,7 +190,9 @@
 		if (!container) return;
 
 		if (!categories.length) {
-			container.innerHTML = `<div class="pet-empty-state">No categories yet.</div>`;
+			container.innerHTML = `<div class="pet-empty-state">${escapeHtml(
+				translate("no_categories_yet", "No categories yet.")
+			)}</div>`;
 			return;
 		}
 
@@ -212,7 +215,9 @@
 		if (!container) return;
 
 		if (!currencies.length) {
-			container.innerHTML = `<div class="pet-empty-state">No currency exposure yet.</div>`;
+			container.innerHTML = `<div class="pet-empty-state">${escapeHtml(
+				translate("no_currency_exposure_yet", "No currency exposure yet.")
+			)}</div>`;
 			return;
 		}
 
@@ -227,7 +232,7 @@
 							<span>${escapeHtml(item.base_display)}</span>
 						</div>
 						<div class="pet-bar-track"><div style="width: ${width}%"></div></div>
-						<span>${item.count} entries</span>
+						<span>${item.count} ${escapeHtml(translate("entries", "entries"))}</span>
 					</div>
 				`;
 			})
@@ -250,6 +255,10 @@
 		if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
 		if (value >= 1000) return `${Math.round(value / 1000)}K`;
 		return String(Math.round(value));
+	}
+
+	function translate(key, fallback) {
+		return translations[key] || fallback;
 	}
 
 	function escapeHtml(value) {

@@ -15,11 +15,19 @@ def get_expense_entry_query_conditions(user=None):
 	return _user_condition("Expense Entry", user)
 
 
+def get_income_entry_query_conditions(user=None):
+	return _user_condition("Income Entry", user)
+
+
 def get_monthly_budget_query_conditions(user=None):
 	return _user_condition("Monthly Budget", user)
 
 
 def has_expense_entry_permission(doc, ptype=None, user=None):
+	return _has_user_owned_permission(doc, ptype, user)
+
+
+def has_income_entry_permission(doc, ptype=None, user=None):
 	return _has_user_owned_permission(doc, ptype, user)
 
 

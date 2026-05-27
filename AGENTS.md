@@ -10,15 +10,18 @@
 - User-facing app name: `Personal Expense Tracker`
 - GitHub repo: `https://github.com/hayyandaood1990/Personal-Expense-Tracker`
 
-This is a Frappe app for personal expense tracking. It lets users record expenses, group them by category, manage monthly budgets, store exchange rates, convert expenses into a base currency, and view dashboards/reports.
+This is a Frappe app for personal expense tracking. It lets users record income and expenses, group expenses by category, manage monthly budgets, store exchange rates, convert amounts into a base currency, and view dashboards/reports.
 
 ## Core Features
 
 - Expense entry tracking with category, amount, currency, payment method, notes, and attachment.
+- Income entry tracking for paychecks and other income sources.
 - Supported currencies: `SYP`, `USD`, `EUR`.
 - Default base currency: `SYP`.
-- Category management with parent categories, active/inactive state, and monthly budget reference.
+- Category management with parent categories, active/inactive state, monthly budget reference, and optional budget date window.
 - Monthly budgets per user, month, year, and category.
+- Monthly budgets cannot exceed that user's total income for the same month.
+- Expenses reduce monthly income; dashboards expose income left after expenses.
 - Currency exchange rates with effective dates and source notes.
 - Live exchange-rate sync from SP Today public pages:
   - `https://sp-today.com/en/currency/us-dollar`
@@ -26,8 +29,8 @@ This is a Frappe app for personal expense tracking. It lets users record expense
 - Generic JSON exchange-rate API sync is also available for future API providers.
 - Personal Expenses workspace with number cards, charts, and shortcuts.
 - Website dashboard route at `/expense-tracker`.
-- Script reports for monthly summary, category summary, and currency exposure.
-- Dummy data for categories, exchange rates, budgets, and sample expenses.
+- Script reports for monthly summary, category summary, expense entry summary, and currency exposure.
+- Dummy data for categories, exchange rates, income, budgets, and sample expenses.
 
 ## Important Doctypes
 
@@ -40,11 +43,41 @@ Fields include:
 - `parent_category`
 - `is_active`
 - `monthly_budget`
+- `budget_from_date`
+- `budget_to_date`
 - `description`
 
 Important validation:
 - Prevent duplicate active category names.
 - Prevent selecting itself as parent category.
+- Budget From Date cannot be after Budget To Date.
+- Expense entries and monthly budgets honor the category budget date window when present.
+
+### Income Entry
+
+Path: `personal_expense_tracker/personal_expense_tracker/doctype/income_entry`
+
+Fields include:
+- `posting_date`
+- `user`
+- `income_source`
+- `description`
+- `amount`
+- `currency`
+- `exchange_rate_to_base`
+- `base_currency`
+- `income_in_base_currency`
+- `reference_no`
+- `attachment`
+- `notes`
+
+Important validation:
+- Income amount must be greater than zero.
+- Currency and base currency must be in `SYP`, `USD`, `EUR`.
+- Exchange rate must be greater than zero unless currency equals base currency.
+- `income_in_base_currency = amount * exchange_rate_to_base`.
+- Normal users cannot enter future-dated income.
+- Normal users can only manage their own income entries.
 
 ### Expense Entry
 
@@ -118,6 +151,8 @@ Important validation:
 - Budget amount must be greater than zero.
 - Unique budget per user, month, year, and category.
 - Budget amount is converted into base currency.
+- Total monthly budgets for a user cannot exceed that user's total Income Entry amount for the same month.
+- The category budget date window must allow the selected month.
 
 ## Roles And Permissions
 
@@ -127,6 +162,7 @@ Roles:
 
 Expected behavior:
 - Expense Users manage their own expense entries and monthly budgets.
+- Expense Users manage their own income entries.
 - Expense Users can read categories and exchange rates.
 - Expense Managers have full access and can view/manage all users' records.
 - Permission query conditions are implemented in `personal_expense_tracker/permissions.py`.
@@ -140,6 +176,7 @@ Important whitelisted methods:
 - `sync_exchange_rates_from_sp_today(effective_date=None, rate_type=None)`
 - `sync_exchange_rates_from_api(base_currency="USD", effective_date=None, provider_url=None)`
 - `get_expense_summary(user=None, from_date=None, to_date=None, currency="SYP")`
+- `get_income_summary(user=None, from_date=None, to_date=None, currency="SYP")`
 - `get_monthly_expense_chart(year=None, user=None)`
 - `get_category_expense_chart(from_date=None, to_date=None, user=None)`
 - `get_monthly_budget_status(user=None, month=None, year=None, category=None, budget_name=None)`
@@ -171,11 +208,13 @@ Report paths:
 - `personal_expense_tracker/personal_expense_tracker/report/monthly_expense_summary`
 - `personal_expense_tracker/personal_expense_tracker/report/category_expense_summary`
 - `personal_expense_tracker/personal_expense_tracker/report/currency_exposure_report`
+- `personal_expense_tracker/personal_expense_tracker/report/expense_entry_summary`
 
 Reports:
 - Monthly Expense Summary
 - Category Expense Summary
 - Currency Exposure Report
+- Expense Entry Summary
 
 ## Workspace And Dashboard
 
@@ -216,7 +255,8 @@ Files:
 Behavior:
 - Requires login and redirects guests to `/login?redirect-to=/expense-tracker`.
 - Reads live Expense Entry, Monthly Budget, category, currency, and recent expense data.
-- Shows a full website dashboard with animated canvas background, metric cards, monthly chart, category donut, currency exposure bars, budget pulse, and recent expense links.
+- Reads live Income Entry totals and subtracts expenses from monthly income.
+- Shows a full website dashboard with animated canvas background, metric cards, monthly chart, category donut, currency exposure bars, income-aware budget pulse, and recent expense links.
 
 ## Dummy Data
 

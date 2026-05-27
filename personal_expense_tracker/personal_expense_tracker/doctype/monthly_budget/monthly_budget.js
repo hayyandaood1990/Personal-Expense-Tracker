@@ -92,12 +92,14 @@ frappe.ui.form.on("Monthly Budget", {
 
 				const status = r.message;
 				const remaining = format_currency(status.remaining, "SYP");
+				const income_remaining = format_currency(status.income_remaining, "SYP");
 				const indicator = status.remaining >= 0 ? "green" : "red";
 				frm.dashboard.clear_headline();
 				frm.dashboard.set_headline(
-					__("Remaining Budget: {0} ({1}% used)", [
+					__("Remaining Budget: {0} ({1}% used). Income left after expenses: {2}", [
 						remaining,
 						flt(status.usage_percent, 2),
+						income_remaining,
 					]),
 					indicator
 				);

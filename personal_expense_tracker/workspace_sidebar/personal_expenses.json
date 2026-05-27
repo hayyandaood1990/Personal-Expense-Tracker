@@ -20,6 +20,18 @@
   },
   {
    "type": "Link",
+   "label": "Income Entry",
+   "link_type": "DocType",
+   "link_to": "Income Entry",
+   "icon": "trending-up",
+   "child": 0,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "show_arrow": 0
+  },
+  {
+   "type": "Link",
    "label": "Expense Entry",
    "link_type": "DocType",
    "link_to": "Expense Entry",
@@ -86,6 +98,3 @@
  "public": 1,
  "title": "Personal Expenses"
 }
-
-
-//TODO add website dashboard to pesonal exxpense workspace side bar

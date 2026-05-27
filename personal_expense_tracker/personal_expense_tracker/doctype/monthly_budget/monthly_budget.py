@@ -4,9 +4,15 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt
+from frappe.utils import cint, flt, getdate
 
-from personal_expense_tracker.utils import BASE_CURRENCY, MONTHS, SUPPORTED_CURRENCIES, is_expense_manager
+from personal_expense_tracker.utils import (
+	BASE_CURRENCY,
+	MONTHS,
+	SUPPORTED_CURRENCIES,
+	get_month_date_range,
+	is_expense_manager,
+)
 
 
 class MonthlyBudget(Document):
@@ -26,6 +32,8 @@ class MonthlyBudget(Document):
 		self.validate_currency()
 		self.validate_unique_budget()
 		self.calculate_budget_in_base_currency()
+		self.validate_category_budget_period()
+		self.validate_budget_total_against_income()
 
 	def validate_user_access(self):
 		if is_expense_manager() or frappe.session.user == "Administrator":
@@ -64,6 +72,76 @@ class MonthlyBudget(Document):
 			frappe.throw(
 				_("A Monthly Budget already exists for {0}, {1} {2}, and category {3}.").format(
 					self.user, self.month, self.year, self.category
+				)
+			)
+
+	def validate_category_budget_period(self):
+		if not self.category or not self.month or not self.year:
+			return
+
+		category = frappe.db.get_value(
+			"Expense Category",
+			self.category,
+			["budget_from_date", "budget_to_date"],
+			as_dict=True,
+		)
+		if not category:
+			return
+
+		month_start, month_end = get_month_date_range(self.month, self.year)
+		if category.budget_from_date and month_end < getdate(category.budget_from_date):
+			frappe.throw(
+				_("Category {0} budget can only start from {1}.").format(
+					self.category, category.budget_from_date
+				)
+			)
+		if category.budget_to_date and month_start > getdate(category.budget_to_date):
+			frappe.throw(
+				_("Category {0} budget can only be used until {1}.").format(
+					self.category, category.budget_to_date
+				)
+			)
+
+	def validate_budget_total_against_income(self):
+		if not self.user or not self.month or not self.year:
+			return
+
+		if not frappe.db.exists("DocType", "Income Entry"):
+			return
+
+		month_start, month_end = get_month_date_range(self.month, self.year)
+		income_rows = frappe.get_all(
+			"Income Entry",
+			filters={
+				"user": self.user,
+				"posting_date": ["between", [month_start, month_end]],
+			},
+			fields=["income_in_base_currency"],
+		)
+		total_income = sum(flt(row.income_in_base_currency) for row in income_rows)
+
+		budget_rows = frappe.get_all(
+			"Monthly Budget",
+			filters={
+				"user": self.user,
+				"month": self.month,
+				"year": self.year,
+				"name": ["!=", self.name],
+			},
+			fields=["budget_in_base_currency"],
+		)
+		other_budgets = sum(flt(row.budget_in_base_currency) for row in budget_rows)
+		total_budget = flt(other_budgets + flt(self.budget_in_base_currency), 2)
+
+		if total_budget > total_income:
+			frappe.throw(
+				_(
+					"Total monthly budgets ({0}) cannot be greater than total monthly income ({1}) for {2} {3}."
+				).format(
+					frappe.bold(f"{BASE_CURRENCY} {total_budget:,.2f}"),
+					frappe.bold(f"{BASE_CURRENCY} {total_income:,.2f}"),
+					self.month,
+					self.year,
 				)
 			)
 

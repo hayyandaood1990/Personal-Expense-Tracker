@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt, fmt_money, getdate, today
 
-from personal_expense_tracker.api import get_expense_rows
+from personal_expense_tracker.api import get_expense_rows, get_income_rows
 from personal_expense_tracker.utils import (
 	BASE_CURRENCY,
 	MONTHS,
@@ -32,6 +32,7 @@ def get_context(context):
 	user = None if is_expense_manager() else frappe.session.user
 
 	current_month_rows = get_expense_rows(user=user, from_date=from_date, to_date=to_date)
+	current_month_income_rows = get_income_rows(user=user, from_date=from_date, to_date=to_date)
 	year_rows = get_expense_rows(
 		user=user,
 		from_date=f"{current.year}-01-01",
@@ -46,6 +47,7 @@ def get_context(context):
 		to_date=to_date,
 		user=user,
 		current_month_rows=current_month_rows,
+		current_month_income_rows=current_month_income_rows,
 		year_rows=year_rows,
 		today_rows=today_rows,
 	)
@@ -58,6 +60,7 @@ def get_context(context):
 			"page_data": page_data,
 			"page_data_json": frappe.as_json(page_data),
 			"desk_url": "/desk/personal-expenses",
+			"income_entry_url": "/desk/income-entry",
 			"expense_entry_url": "/desk/expense-entry",
 			"monthly_budget_url": "/desk/monthly-budget",
 			"exchange_rate_url": "/desk/currency-exchange-rate",
@@ -73,15 +76,17 @@ def build_page_data(
 	to_date,
 	user,
 	current_month_rows,
+	current_month_income_rows,
 	year_rows,
 	today_rows,
 ):
 	month_total = get_rows_total(current_month_rows)
+	month_income = get_income_total(current_month_income_rows)
 	today_total = get_rows_total(today_rows)
 	category_totals = get_category_totals(current_month_rows)
 	currency_totals = get_currency_totals(current_month_rows)
 	monthly_totals = get_monthly_totals(year_rows)
-	budget_status = get_budget_status(user, month, current.year, current_month_rows)
+	budget_status = get_budget_status(user, month, current.year, current_month_rows, current_month_income_rows)
 	top_category = get_top_category(category_totals)
 	recent_expenses = get_recent_expenses(user)
 
@@ -91,6 +96,10 @@ def build_page_data(
 		"base_currency": BASE_CURRENCY,
 		"month_total": month_total,
 		"month_total_display": fmt_money(month_total, currency=BASE_CURRENCY),
+		"month_income": month_income,
+		"month_income_display": fmt_money(month_income, currency=BASE_CURRENCY),
+		"net_income": flt(month_income - month_total, 2),
+		"net_income_display": fmt_money(month_income - month_total, currency=BASE_CURRENCY),
 		"today_total": today_total,
 		"today_total_display": fmt_money(today_total, currency=BASE_CURRENCY),
 		"entry_count": len(current_month_rows),
@@ -103,6 +112,7 @@ def build_page_data(
 		"categories": category_totals,
 		"currencies": currency_totals,
 		"recent_expenses": recent_expenses,
+		"translations": get_client_translations(),
 		"from_date": from_date,
 		"to_date": to_date,
 	}
@@ -113,6 +123,18 @@ def get_rows_total(rows):
 	for row in rows:
 		total += convert_amount(
 			row.get("amount_in_base_currency"),
+			row.get("base_currency") or BASE_CURRENCY,
+			BASE_CURRENCY,
+			row.get("posting_date"),
+		)
+	return flt(total, 2)
+
+
+def get_income_total(rows):
+	total = 0
+	for row in rows:
+		total += convert_amount(
+			row.get("income_in_base_currency"),
 			row.get("base_currency") or BASE_CURRENCY,
 			BASE_CURRENCY,
 			row.get("posting_date"),
@@ -179,7 +201,7 @@ def get_monthly_totals(rows):
 	return [flt(value, 2) for value in values]
 
 
-def get_budget_status(user, month, year, rows):
+def get_budget_status(user, month, year, rows, income_rows):
 	budget_filters = {"month": month, "year": year}
 	if user:
 		budget_filters["user"] = user
@@ -191,18 +213,26 @@ def get_budget_status(user, month, year, rows):
 	)
 	total_budget = sum(flt(row.get("budget_in_base_currency")) for row in budgets)
 	spent = get_rows_total(rows)
-	remaining = total_budget - spent
-	usage_percent = (spent / total_budget * 100) if total_budget else 0
+	total_income = get_income_total(income_rows)
+	remaining_budget = total_budget - spent
+	income_remaining = total_income - spent
+	usage_percent = (spent / total_income * 100) if total_income else 0
+	allocation_percent = (total_budget / total_income * 100) if total_income else 0
 
 	return {
 		"total": flt(total_budget, 2),
 		"total_display": fmt_money(total_budget, currency=BASE_CURRENCY),
+		"income": flt(total_income, 2),
+		"income_display": fmt_money(total_income, currency=BASE_CURRENCY),
 		"spent": spent,
 		"spent_display": fmt_money(spent, currency=BASE_CURRENCY),
-		"remaining": flt(remaining, 2),
-		"remaining_display": fmt_money(remaining, currency=BASE_CURRENCY),
+		"remaining": flt(remaining_budget, 2),
+		"remaining_display": fmt_money(remaining_budget, currency=BASE_CURRENCY),
+		"income_remaining": flt(income_remaining, 2),
+		"income_remaining_display": fmt_money(income_remaining, currency=BASE_CURRENCY),
 		"usage_percent": flt(usage_percent, 2),
 		"usage_width": min(flt(usage_percent, 2), 100),
+		"allocation_percent": flt(allocation_percent, 2),
 		"count": len(budgets),
 	}
 
@@ -251,3 +281,11 @@ def get_recent_expenses(user):
 		}
 		for row in rows
 	]
+
+
+def get_client_translations():
+	return {
+		"no_categories_yet": _("No categories yet."),
+		"no_currency_exposure_yet": _("No currency exposure yet."),
+		"entries": _("entries"),
+	}

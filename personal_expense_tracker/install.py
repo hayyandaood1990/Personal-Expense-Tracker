@@ -17,6 +17,7 @@ DEFAULT_CATEGORIES = [
 	"Entertainment",
 	"Shopping",
 	"Family",
+	"Savings",
 	"Other",
 ]
 
@@ -57,6 +58,7 @@ def create_dummy_data(user: str | None = None):
 
 	create_default_categories()
 	create_dummy_exchange_rates()
+	create_sample_income(user)
 	create_sample_budgets(user)
 	create_sample_expenses(user)
 	frappe.db.commit()
@@ -140,6 +142,31 @@ def create_sample_budgets(user):
 			}
 		)
 		budget.insert(ignore_permissions=True)
+
+
+def create_sample_income(user):
+	current = getdate(today())
+	reference_no = "DUMMY-PET-INCOME-001"
+	values = {
+		"posting_date": current.replace(day=1),
+		"user": user,
+		"income_source": "Paycheck",
+		"description": "Monthly paycheck",
+		"amount": 5000000,
+		"currency": BASE_CURRENCY,
+		"exchange_rate_to_base": 1,
+		"base_currency": BASE_CURRENCY,
+		"reference_no": reference_no,
+		"notes": "Dummy income entry for Personal Expense Tracker demo data.",
+	}
+	existing = frappe.db.exists("Income Entry", {"reference_no": reference_no, "user": user})
+	if existing:
+		income = frappe.get_doc("Income Entry", existing)
+		income.update(values)
+		income.save(ignore_permissions=True)
+	else:
+		income = frappe.get_doc({"doctype": "Income Entry", **values})
+		income.insert(ignore_permissions=True)
 
 
 def create_sample_expenses(user):

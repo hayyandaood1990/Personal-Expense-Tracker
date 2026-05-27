@@ -1,0 +1,185 @@
+source,target
+Personal Expense Tracker,متتبع المصاريف الشخصية
+Personal Expenses,المصاريف الشخصية
+Expense Tracking,تتبع المصاريف
+Expense User,مستخدم المصاريف
+Expense Manager,مدير المصاريف
+Workspace,مساحة العمل
+Website Dashboard,لوحة الموقع
+Masters,البيانات الأساسية
+Transactions,المعاملات
+Reports,التقارير
+Dashboard,لوحة المعلومات
+Expense overview,نظرة عامة على المصاريف
+Expense Category,فئة المصروف
+Expense Entry,قيد مصروف
+Currency Exchange Rate,سعر صرف العملة
+Monthly Budget,الميزانية الشهرية
+Category Name,اسم الفئة
+Parent Category,الفئة الأب
+Is Active,نشط
+Description,الوصف
+Posting Date,تاريخ القيد
+User,المستخدم
+Category,الفئة
+Currency Details,تفاصيل العملة
+Amount,المبلغ
+Currency,العملة
+Exchange Rate to Base,سعر الصرف إلى العملة الأساسية
+Base Currency,العملة الأساسية
+Amount in Base Currency,المبلغ بالعملة الأساسية
+Payment Details,تفاصيل الدفع
+Payment Method,طريقة الدفع
+Reference No,رقم المرجع
+Attachment,المرفق
+Notes,ملاحظات
+From Currency,من عملة
+To Currency,إلى عملة
+Exchange Rate,سعر الصرف
+Effective Date,تاريخ السريان
+Source,المصدر
+Month,الشهر
+Year,السنة
+Budget Amount,مبلغ الميزانية
+Budget in Base Currency,الميزانية بالعملة الأساسية
+Budget in Base Currency (SYP),الميزانية بالعملة الأساسية (ليرة سورية)
+Cash,نقداً
+Bank Transfer,حوالة مصرفية
+Card,بطاقة
+Wallet,محفظة
+Other,أخرى
+January,يناير
+February,فبراير
+March,مارس
+April,أبريل
+May,مايو
+June,يونيو
+July,يوليو
+August,أغسطس
+September,سبتمبر
+October,أكتوبر
+November,نوفمبر
+December,ديسمبر
+Food,طعام
+Transport,مواصلات
+Rent,إيجار
+Utilities,خدمات
+Health,صحة
+Education,تعليم
+Entertainment,ترفيه
+Shopping,تسوق
+Family,العائلة
+Monthly Expense Summary,ملخص المصاريف الشهري
+Category Expense Summary,ملخص المصاريف حسب الفئة
+Currency Exposure Report,تقرير التعرض للعملات
+Expense Entry Summary,ملخص قيود المصاريف
+From Date,من تاريخ
+To Date,إلى تاريخ
+Total Expenses,إجمالي المصاريف
+Percentage of Total,النسبة من الإجمالي
+Number of Entries,عدد القيود
+Total Original Amount,إجمالي المبلغ الأصلي
+Total Base Amount,إجمالي المبلغ الأساسي
+Average Exchange Rate,متوسط سعر الصرف
+Base Amount,المبلغ الأساسي
+Entries,القيود
+Categories,الفئات
+This Month Expenses,مصاريف هذا الشهر
+Today Expenses,مصاريف اليوم
+Top Category,أعلى فئة
+Budget Usage,استخدام الميزانية
+Monthly Expenses,المصاريف الشهرية
+Expenses by Category,المصاريف حسب الفئة
+Expenses by Currency,المصاريف حسب العملة
+Expenses,المصاريف
+Budgets,الميزانيات
+"A living view of spending, budgets, categories, and currency exposure.",عرض حي للمصاريف والميزانيات والفئات والتعرض للعملات.
+This Month,هذا الشهر
+Today,اليوم
+entries,قيود
+Base currency,العملة الأساسية
+left,متبقي
+Year Flow,تدفق السنة
+Shape,الشكل
+Exposure,التعرض
+Currencies,العملات
+Budget,الميزانية
+Monthly Pulse,نبض الشهر
+Spent,المصروف
+Remaining,المتبقي
+Ledger,السجل
+Recent Expenses,أحدث المصاريف
+View All,عرض الكل
+No expenses yet.,لا توجد مصاريف بعد.
+No expenses,لا توجد مصاريف
+No categories yet.,لا توجد فئات بعد.
+No currency exposure yet.,لا يوجد تعرض للعملات بعد.
+Fetch Exchange Rate,جلب سعر الصرف
+Sync SP Today Rates,مزامنة أسعار SP Today
+Exchange rate fetched from {0},تم جلب سعر الصرف من {0}
+No active exchange rate found for {0} to {1}.,لا يوجد سعر صرف نشط من {0} إلى {1}.
+Amount in {0}: {1},المبلغ بـ {0}: {1}
+Syncing SP Today exchange rates...,جارٍ مزامنة أسعار صرف SP Today...
+{0} SP Today exchange rates synced.,تمت مزامنة {0} أسعار صرف من SP Today.
+Remaining Budget: {0} ({1}% used),الميزانية المتبقية: {0} (مستخدم {1}%)
+Only Expense Managers can sync exchange rates.,يمكن لمديري المصاريف فقط مزامنة أسعار الصرف.
+Could not fetch exchange rates from API: {0},تعذر جلب أسعار الصرف من واجهة API: {0}
+Exchange-rate API returned an invalid JSON response.,أرجعت واجهة أسعار الصرف استجابة JSON غير صالحة.
+Unknown API error,خطأ API غير معروف
+Exchange-rate API returned an error: {0},أرجعت واجهة أسعار الصرف خطأ: {0}
+API Base Currency,عملة API الأساسية
+Exchange-rate API response does not contain a rates object.,استجابة واجهة أسعار الصرف لا تحتوي على كائن الأسعار.
+Exchange-rate API response is missing rates for: {0},استجابة واجهة أسعار الصرف لا تحتوي على أسعار لـ: {0}
+SP Today rate type must be one of: {0},نوع سعر SP Today يجب أن يكون واحداً من: {0}
+Could not read {0}/SYP rates from SP Today page.,تعذرت قراءة أسعار {0}/SYP من صفحة SP Today.
+SP Today page is not configured for {0}.,صفحة SP Today غير مضبوطة لـ {0}.
+Could not fetch {0}/SYP rates from SP Today: {1},تعذر جلب أسعار {0}/SYP من SP Today: {1}
+SP Today returned an invalid {0}/SYP rate.,أرجع SP Today سعراً غير صالح لـ {0}/SYP.
+SP Today returned an invalid exchange rate.,أرجع SP Today سعر صرف غير صالح.
+Invalid API rate received for {0} or {1}.,تم استلام سعر API غير صالح لـ {0} أو {1}.
+Synced from live exchange-rate API on {0}. Provider timestamp: {1},تمت المزامنة من واجهة أسعار الصرف المباشرة بتاريخ {0}. توقيت المزوّد: {1}
+not provided,غير متوفر
+You are not permitted to view this budget.,غير مسموح لك بعرض هذه الميزانية.
+Amount must be greater than zero.,يجب أن يكون المبلغ أكبر من صفر.
+{0} must be one of: {1},يجب أن يكون {0} واحداً من: {1}
+Exchange Rate to Base must be greater than zero.,يجب أن يكون سعر الصرف إلى العملة الأساسية أكبر من صفر.
+Only users with the Expense Manager role can enter future dated expenses.,يمكن فقط للمستخدمين الذين لديهم دور مدير المصاريف إدخال مصاريف بتاريخ مستقبلي.
+You can only create or update Expense Entries for your own user.,يمكنك إنشاء أو تحديث قيود المصاريف الخاصة بمستخدمك فقط.
+No active exchange rate found for {0} to {1} on or before {2}.,لا يوجد سعر صرف نشط من {0} إلى {1} في أو قبل {2}.
+Month must be a valid month name.,يجب أن يكون الشهر اسماً صالحاً.
+From Currency and To Currency cannot be the same.,لا يمكن أن تكون عملة المصدر وعملة الهدف متطابقتين.
+Exchange Rate must be greater than zero.,يجب أن يكون سعر الصرف أكبر من صفر.
+Only one active exchange rate can exist for {0} to {1} on {2}.,يمكن وجود سعر صرف نشط واحد فقط من {0} إلى {1} بتاريخ {2}.
+An active Expense Category named {0} already exists.,توجد فئة مصروف نشطة باسم {0} مسبقاً.
+An Expense Category cannot be its own parent category.,لا يمكن أن تكون فئة المصروف أباً لنفسها.
+You can only create or update Monthly Budgets for your own user.,يمكنك إنشاء أو تحديث الميزانيات الشهرية الخاصة بمستخدمك فقط.
+Year must be a valid positive number.,يجب أن تكون السنة رقماً موجباً صالحاً.
+Budget Amount must be greater than zero.,يجب أن يكون مبلغ الميزانية أكبر من صفر.
+Currency must be one of: {0},يجب أن تكون العملة واحدة من: {0}
+"A Monthly Budget already exists for {0}, {1} {2}, and category {3}.",توجد ميزانية شهرية مسبقاً لـ {0}، {1} {2}، والفئة {3}.
+Income Entry,قيد دخل
+Budget Period,فترة الميزانية
+Budget From Date,تاريخ بداية الميزانية
+Budget To Date,تاريخ نهاية الميزانية
+Income Source,مصدر الدخل
+Income in Base Currency,الدخل بالعملة الأساسية
+Reference,المرجع
+Paycheck,راتب
+Freelance,عمل حر
+Gift,هدية
+Investment,استثمار
+Savings,مدخرات
+Monthly Income,الدخل الشهري
+Income,الدخل
+left after expenses,متبقٍ بعد المصاريف
+Income Amount must be greater than zero.,يجب أن يكون مبلغ الدخل أكبر من صفر.
+Only users with the Expense Manager role can enter future dated income.,يمكن فقط للمستخدمين الذين لديهم دور مدير المصاريف إدخال دخل بتاريخ مستقبلي.
+You can only create or update Income Entries for your own user.,يمكنك إنشاء أو تحديث قيود الدخل الخاصة بمستخدمك فقط.
+Income in {0}: {1},الدخل بـ {0}: {1}
+Budget From Date cannot be after Budget To Date.,لا يمكن أن يكون تاريخ بداية الميزانية بعد تاريخ نهايتها.
+Category {0} can only be used from {1}.,يمكن استخدام الفئة {0} فقط ابتداءً من {1}.
+Category {0} can only be used until {1}.,يمكن استخدام الفئة {0} فقط حتى {1}.
+Category {0} budget can only start from {1}.,يمكن أن تبدأ ميزانية الفئة {0} فقط من {1}.
+Category {0} budget can only be used until {1}.,يمكن استخدام ميزانية الفئة {0} فقط حتى {1}.
+Remaining Budget: {0} ({1}% used). Income left after expenses: {2},الميزانية المتبقية: {0} (مستخدم {1}%). الدخل المتبقي بعد المصاريف: {2}
+"Total monthly budgets ({0}) cannot be greater than total monthly income ({1}) for {2} {3}.",لا يمكن أن يكون إجمالي الميزانيات الشهرية ({0}) أكبر من إجمالي الدخل الشهري ({1}) لـ {2} {3}.

@@ -79,5 +79,4 @@ def get_chart(data):
 			"datasets": [{"name": _("Expenses"), "values": [flt(row["total_expenses"]) for row in data]}],
 		},
 		"type": "donut",
-		"fieldtype": "Currency",
 	}

@@ -270,10 +270,12 @@ fixtures = [
 
 permission_query_conditions = {
 	"Expense Entry": "personal_expense_tracker.permissions.get_expense_entry_query_conditions",
+	"Income Entry": "personal_expense_tracker.permissions.get_income_entry_query_conditions",
 	"Monthly Budget": "personal_expense_tracker.permissions.get_monthly_budget_query_conditions",
 }
 
 has_permission = {
 	"Expense Entry": "personal_expense_tracker.permissions.has_expense_entry_permission",
+	"Income Entry": "personal_expense_tracker.permissions.has_income_entry_permission",
 	"Monthly Budget": "personal_expense_tracker.permissions.has_monthly_budget_permission",
 }

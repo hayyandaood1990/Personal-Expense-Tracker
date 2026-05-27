@@ -14,7 +14,7 @@
    "label": "Expenses by Currency"
   }
  ],
- "content": "[{\"id\":\"pet-card-this-month\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"This Month Expenses\",\"col\":3}},{\"id\":\"pet-card-today\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today Expenses\",\"col\":3}},{\"id\":\"pet-card-top-category\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Top Category\",\"col\":3}},{\"id\":\"pet-card-budget\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Budget Usage\",\"col\":3}},{\"id\":\"pet-chart-monthly\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Expenses\",\"col\":12}},{\"id\":\"pet-chart-category\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Category\",\"col\":6}},{\"id\":\"pet-chart-currency\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Currency\",\"col\":6}},{\"id\":\"pet-header-links\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Expense Tracking</b></span>\",\"col\":12}},{\"id\":\"pet-card-website\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Website Dashboard\",\"col\":3}},{\"id\":\"pet-card-entry\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Entry\",\"col\":3}},{\"id\":\"pet-card-category\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Category\",\"col\":3}},{\"id\":\"pet-card-budget-link\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Monthly Budget\",\"col\":3}},{\"id\":\"pet-card-rate\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Currency Exchange Rate\",\"col\":3}}]",
+ "content": "[{\"id\":\"pet-card-this-month\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"This Month Expenses\",\"col\":3}},{\"id\":\"pet-card-today\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today Expenses\",\"col\":3}},{\"id\":\"pet-card-top-category\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Top Category\",\"col\":3}},{\"id\":\"pet-card-budget\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Budget Usage\",\"col\":3}},{\"id\":\"pet-chart-monthly\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Expenses\",\"col\":12}},{\"id\":\"pet-chart-category\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Category\",\"col\":6}},{\"id\":\"pet-chart-currency\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Currency\",\"col\":6}},{\"id\":\"pet-header-links\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Expense Tracking</b></span>\",\"col\":12}},{\"id\":\"pet-card-website\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Website Dashboard\",\"col\":3}},{\"id\":\"pet-card-income\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Income Entry\",\"col\":3}},{\"id\":\"pet-card-entry\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Entry\",\"col\":3}},{\"id\":\"pet-card-category\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Category\",\"col\":3}},{\"id\":\"pet-card-budget-link\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Monthly Budget\",\"col\":3}},{\"id\":\"pet-card-rate\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Currency Exchange Rate\",\"col\":3}}]",
  "creation": "2026-05-14 00:00:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
@@ -55,7 +55,16 @@
   {
    "type": "Card Break",
    "label": "Transactions",
-   "link_count": 2,
+   "link_count": 3,
+   "hidden": 0,
+   "is_query_report": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Income Entry",
+   "link_type": "DocType",
+   "link_to": "Income Entry",
    "hidden": 0,
    "is_query_report": 0,
    "onboard": 0
@@ -81,7 +90,7 @@
   {
    "type": "Card Break",
    "label": "Reports",
-   "link_count": 3,
+   "link_count": 4,
    "hidden": 0,
    "is_query_report": 0,
    "onboard": 0
@@ -100,6 +109,15 @@
    "label": "Category Expense Summary",
    "link_type": "Report",
    "link_to": "Category Expense Summary",
+   "is_query_report": 1,
+   "hidden": 0,
+   "onboard": 0
+  },
+  {
+   "type": "Link",
+   "label": "Expense Entry Summary",
+   "link_type": "Report",
+   "link_to": "Expense Entry Summary",
    "is_query_report": 1,
    "hidden": 0,
    "onboard": 0
@@ -154,6 +172,13 @@
    "type": "URL",
    "url": "/expense-tracker",
    "label": "Website Dashboard",
+   "color": "Cyan"
+  },
+  {
+   "type": "DocType",
+   "link_to": "Income Entry",
+   "label": "Income Entry",
+   "doc_view": "List",
    "color": "Cyan"
   },
   {

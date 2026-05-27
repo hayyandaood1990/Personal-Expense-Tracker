@@ -18,6 +18,7 @@
 				</p>
 			</div>
 			<div class="pet-actions">
+				<a class="pet-button pet-button-primary" href="{{ income_entry_url }}">{{ _("Income") }}</a>
 				<a class="pet-button pet-button-primary" href="{{ expense_entry_url }}">{{ _("Expenses") }}</a>
 				<a class="pet-button" href="{{ monthly_budget_url }}">{{ _("Budgets") }}</a>
 				<a class="pet-button" href="{{ desk_url }}">{{ _("Workspace") }}</a>
@@ -31,9 +32,9 @@
 				<small>{{ page_data.entry_count }} {{ _("entries") }}</small>
 			</article>
 			<article class="pet-card pet-metric pet-accent-green">
-				<span>{{ _("Today") }}</span>
-				<strong>{{ page_data.today_total_display }}</strong>
-				<small>{{ _("Base currency") }} {{ page_data.base_currency }}</small>
+				<span>{{ _("Monthly Income") }}</span>
+				<strong>{{ page_data.month_income_display }}</strong>
+				<small>{{ page_data.net_income_display }} {{ _("left after expenses") }}</small>
 			</article>
 			<article class="pet-card pet-metric pet-accent-pink">
 				<span>{{ _("Top Category") }}</span>
@@ -43,7 +44,7 @@
 			<article class="pet-card pet-metric pet-accent-gold">
 				<span>{{ _("Budget Usage") }}</span>
 				<strong>{{ page_data.budget.usage_percent }}%</strong>
-				<small>{{ page_data.budget.remaining_display }} {{ _("left") }}</small>
+				<small>{{ page_data.budget.income_remaining_display }} {{ _("left after expenses") }}</small>
 			</article>
 		</section>
 
@@ -98,6 +99,10 @@
 					<div style="width: {{ page_data.budget.usage_width }}%"></div>
 				</div>
 				<div class="pet-budget-numbers">
+					<div>
+						<span>{{ _("Income") }}</span>
+						<strong>{{ page_data.budget.income_display }}</strong>
+					</div>
 					<div>
 						<span>{{ _("Budget") }}</span>
 						<strong>{{ page_data.budget.total_display }}</strong>
