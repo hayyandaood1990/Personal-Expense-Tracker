@@ -621,3 +621,20 @@ def get_budget_usage_card(filters=None):
 	total_income = get_total_income_in_currency(income_rows, BASE_CURRENCY)
 	usage = (spent / total_income * 100) if total_income else 0
 	return {"value": flt(usage, 3), "fieldtype": "Percent"}
+
+
+@frappe.whitelist()
+def get_remaining_budget_card(filters=None):
+	current = getdate(today())
+	month = calendar.month_name[current.month]
+	user = None if is_expense_manager() else frappe.session.user
+	from_date, to_date = get_month_date_range(month, current.year)
+	expense_rows = get_expense_rows(user=user, from_date=from_date, to_date=to_date)
+	income_rows = get_income_rows(user=user, from_date=from_date, to_date=to_date)
+	spent = get_total_in_currency(expense_rows, BASE_CURRENCY)
+	total_income = get_total_income_in_currency(income_rows, BASE_CURRENCY)
+	return {
+		"value": flt(total_income - spent, 2),
+		"fieldtype": "Currency",
+		"options": BASE_CURRENCY,
+	}

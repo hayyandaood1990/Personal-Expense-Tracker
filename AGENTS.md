@@ -29,7 +29,8 @@ This is a Frappe app for personal expense tracking. It lets users record income 
 - Generic JSON exchange-rate API sync is also available for future API providers.
 - Personal Expenses workspace with number cards, charts, and shortcuts.
 - Website dashboard route at `/expense-tracker`.
-- Script reports for monthly summary, category summary, expense entry summary, and currency exposure.
+- Script reports for monthly summary, category summary, expense entry summary, currency exposure, and income-vs-expense comparison.
+- Remaining monthly income is reported as a Savings planning value; do not auto-create a Savings expense unless the user explicitly asks, because that would change expense totals.
 - Dummy data for categories, exchange rates, income, budgets, and sample expenses.
 
 ## Important Doctypes
@@ -184,6 +185,11 @@ Important whitelisted methods:
 - `get_today_expenses_card(filters=None)`
 - `get_top_category_card(filters=None)`
 - `get_budget_usage_card(filters=None)`
+- `get_remaining_budget_card(filters=None)`
+
+Budget card behavior:
+- `get_budget_usage_card` returns the percent of monthly income spent, not percent of category budgets used.
+- `get_remaining_budget_card` returns total monthly income minus monthly expenses as a `SYP` currency value.
 
 SP Today sync notes:
 - Defaults to `sell` rate.
@@ -209,12 +215,21 @@ Report paths:
 - `personal_expense_tracker/personal_expense_tracker/report/category_expense_summary`
 - `personal_expense_tracker/personal_expense_tracker/report/currency_exposure_report`
 - `personal_expense_tracker/personal_expense_tracker/report/expense_entry_summary`
+- `personal_expense_tracker/personal_expense_tracker/report/income_vs_expense_summary`
 
 Reports:
 - Monthly Expense Summary
 - Category Expense Summary
 - Currency Exposure Report
 - Expense Entry Summary
+- Income vs Expense Summary
+
+Income vs Expense Summary behavior:
+- Filters by from date, to date, user, income source, and currency.
+- Lists income entries for the selected period.
+- Adds summary rows for Total Expenses and Unspent Income to Savings.
+- Report summary shows Total Income, Total Expenses, Unspent Income to Savings, and Income Used %.
+- The chart compares total expenses with the unspent amount that can be treated as month-end savings.
 
 ## Workspace And Dashboard
 
@@ -232,6 +247,12 @@ Workspace cards:
 - Today Expenses
 - Top Category
 - Budget Usage
+- Remaining Budget
+
+Card math:
+- Budget Usage = current-month expenses / current-month income * 100.
+- Remaining Budget = current-month income - current-month expenses.
+- For Expense Managers the cards use all visible users; for normal users they use only the session user's records.
 
 Charts:
 - Monthly Expenses
@@ -274,6 +295,7 @@ Dummy categories:
 - Shopping
 - Family
 - Other
+- Savings
 
 Reload dummy data:
 

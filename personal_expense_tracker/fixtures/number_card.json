@@ -54,5 +54,19 @@
   "show_full_number": 1,
   "show_percentage_stats": 0,
   "color": "#f2994a"
+ },
+ {
+  "doctype": "Number Card",
+  "name": "Remaining Budget",
+  "label": "Remaining Budget",
+  "type": "Custom",
+  "method": "personal_expense_tracker.api.get_remaining_budget_card",
+  "document_type": "Income Entry",
+  "is_public": 1,
+  "is_standard": 0,
+  "module": "Personal Expense Tracker",
+  "show_full_number": 1,
+  "show_percentage_stats": 0,
+  "color": "#00a88e"
  }
 ]

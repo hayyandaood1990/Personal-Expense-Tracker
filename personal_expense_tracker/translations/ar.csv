@@ -176,6 +176,20 @@ Income Amount must be greater than zero.,يجب أن يكون مبلغ الدخ�
 Only users with the Expense Manager role can enter future dated income.,يمكن فقط للمستخدمين الذين لديهم دور مدير المصاريف إدخال دخل بتاريخ مستقبلي.
 You can only create or update Income Entries for your own user.,يمكنك إنشاء أو تحديث قيود الدخل الخاصة بمستخدمك فقط.
 Income in {0}: {1},الدخل بـ {0}: {1}
+Income vs Expense Summary,ملخص الدخل مقابل المصاريف
+Type,النوع
+Source / Category,المصدر / الفئة
+Income Amount,مبلغ الدخل
+Expense Amount,مبلغ المصروف
+Remaining / Savings,المتبقي / المدخرات
+Income Used %,نسبة الدخل المستخدم
+Total Income,إجمالي الدخل
+Unspent Income to Savings,الدخل غير المصروف إلى المدخرات
+Income Allocation,توزيع الدخل
+All Expense Categories,كل فئات المصاريف
+Total expenses in the selected period.,إجمالي المصاريف في الفترة المحددة.
+Amount left from income after expenses. Treat this as month-end savings.,المبلغ المتبقي من الدخل بعد المصاريف. اعتبره مدخرات نهاية الشهر.
+Remaining Budget,الميزانية المتبقية
 Budget From Date cannot be after Budget To Date.,لا يمكن أن يكون تاريخ بداية الميزانية بعد تاريخ نهايتها.
 Category {0} can only be used from {1}.,يمكن استخدام الفئة {0} فقط ابتداءً من {1}.
 Category {0} can only be used until {1}.,يمكن استخدام الفئة {0} فقط حتى {1}.

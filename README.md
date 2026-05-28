@@ -1,21 +1,24 @@
 # Personal Expense Tracker
 
-A Frappe Framework v16 app for personal expense tracking, monthly budgets, categories, and multi-currency conversion.
+A Frappe Framework v16 app for personal income and expense tracking, monthly budgets, savings planning, categories, and multi-currency conversion.
 
 ## Features
 
 - Expense categories with active/inactive status and monthly budget reference
+- Income entries for paychecks, freelance income, gifts, investments, and other income
 - Expense entries in SYP, USD, and EUR
 - Currency exchange rates with effective dates
 - Live exchange-rate sync for SYP, USD, and EUR
 - Monthly budgets per user, month, year, and category
+- Budget usage is calculated against monthly income so expenses reduce available income
+- Remaining income is shown as a Savings value for month-end planning
 - Expense User and Expense Manager roles
-- Permission filters so normal users only see their own expenses and budgets
+- Permission filters so normal users only see their own income, expenses, and budgets
 - Client-side exchange-rate fetching and base-currency calculation
-- Script reports for monthly, category, and currency exposure summaries
-- Personal Expenses workspace and dashboard widgets
+- Script reports for monthly, category, entry-level, currency exposure, and income-vs-expense summaries
+- Personal Expenses workspace with dashboard widgets, including Remaining Budget in currency value
 - Website dashboard at `/expense-tracker`
-- Dummy categories, exchange rates, budgets, and sample expenses
+- Dummy categories, exchange rates, income, budgets, and sample expenses
 
 ## Installation
 
@@ -36,7 +39,7 @@ bench --site your-site-name migrate
 
 ## Dummy Data
 
-The installer creates default roles, categories, placeholder exchange rates, sample budgets, and sample expenses.
+The installer creates default roles, categories, placeholder exchange rates, sample income, sample budgets, and sample expenses. A `Savings` category is included for tracking money left after monthly expenses.
 
 To reload dummy data for a user:
 
@@ -88,7 +91,23 @@ bench --site your-site-name execute personal_expense_tracker.api.sync_exchange_r
 
 - Monthly Expense Summary
 - Category Expense Summary
+- Expense Entry Summary
 - Currency Exposure Report
+- Income vs Expense Summary
+
+The **Income vs Expense Summary** report compares all income in a selected period with total expenses, then calculates the unspent amount that can be treated as month-end savings.
+
+## Workspace Cards
+
+The Personal Expenses workspace includes these number cards:
+
+- This Month Expenses
+- Today Expenses
+- Top Category
+- Budget Usage
+- Remaining Budget
+
+`Budget Usage` shows the percentage of income spent. `Remaining Budget` shows the actual money left from monthly income after expenses.
 
 ## Website Dashboard
 
