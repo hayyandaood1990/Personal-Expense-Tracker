@@ -10,7 +10,7 @@
 - User-facing app name: `Personal Expense Tracker`
 - GitHub repo: `https://github.com/hayyandaood1990/Personal-Expense-Tracker`
 
-This is a Frappe app for personal expense tracking. It lets users record income and expenses, group expenses by category, manage monthly budgets, store exchange rates, convert amounts into a base currency, and view dashboards/reports.
+This is a Frappe app for personal expense tracking. It lets users record income and expenses, group expenses by a professional category structure, manage monthly budgets, store exchange rates, convert amounts into a base currency, and view dashboards/reports.
 
 ## Core Features
 
@@ -18,7 +18,7 @@ This is a Frappe app for personal expense tracking. It lets users record income 
 - Income entry tracking for paychecks and other income sources.
 - Supported currencies: `SYP`, `USD`, `EUR`.
 - Default base currency: `SYP`.
-- Category management with parent categories, active/inactive state, monthly budget reference, and optional budget date window.
+- Professional category management with parent categories, active/inactive state, monthly budget reference, and optional budget date window.
 - Monthly budgets per user, month, year, and category.
 - Monthly budgets cannot exceed that user's total income for the same month.
 - Expenses reduce monthly income; dashboards expose income left after expenses.
@@ -284,18 +284,23 @@ Behavior:
 Installer/dummy data file:
 - `personal_expense_tracker/install.py`
 
-Dummy categories:
-- Food
-- Transport
-- Rent
-- Utilities
-- Health
-- Education
-- Entertainment
-- Shopping
-- Family
-- Other
-- Savings
+Default professional categories are stored as Arabic `Expense Category` document names so Link fields display Arabic values:
+- إيجار السكن
+- المواد الغذائية والوجبات
+- الملابس والأغراض الشخصية
+- السيارة والوقود
+- المواصلات العامة
+- دعم المنزل
+- الهدايا والالتزامات الاجتماعية
+- الزكاة والتبرعات
+- الزيارات والضيافة
+- التبغ والأركيلة
+- الخدمات
+- الصحة
+- التعليم
+- الترفيه
+- المدخرات
+- المتفرقات
 
 Reload dummy data:
 

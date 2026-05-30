@@ -4,7 +4,7 @@ A Frappe Framework v16 app for personal income and expense tracking, monthly bud
 
 ## Features
 
-- Expense categories with active/inactive status and monthly budget reference
+- Professional expense categories with active/inactive status and monthly budget reference
 - Income entries for paychecks, freelance income, gifts, investments, and other income
 - Expense entries in SYP, USD, and EUR
 - Currency exchange rates with effective dates
@@ -39,7 +39,9 @@ bench --site your-site-name migrate
 
 ## Dummy Data
 
-The installer creates default roles, categories, placeholder exchange rates, sample income, sample budgets, and sample expenses. A `Savings` category is included for tracking money left after monthly expenses.
+The installer creates default roles, professional categories, placeholder exchange rates, sample income, sample budgets, and sample expenses. A `Savings` category is included for tracking money left after monthly expenses.
+
+Default categories are stored in Arabic so they appear in Arabic inside Link fields: إيجار السكن، المواد الغذائية والوجبات، الملابس والأغراض الشخصية، السيارة والوقود، المواصلات العامة، دعم المنزل، الهدايا والالتزامات الاجتماعية، الزكاة والتبرعات، الزيارات والضيافة، التبغ والأركيلة، الخدمات، الصحة، التعليم، الترفيه، المدخرات، والمتفرقات.
 
 To reload dummy data for a user:
 

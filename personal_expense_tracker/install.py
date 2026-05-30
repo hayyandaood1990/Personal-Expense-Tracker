@@ -8,17 +8,22 @@ from frappe.utils import add_days, flt, getdate, today
 from personal_expense_tracker.utils import BASE_CURRENCY, get_latest_rate_record
 
 DEFAULT_CATEGORIES = [
-	"Food",
-	"Transport",
-	"Rent",
-	"Utilities",
-	"Health",
-	"Education",
-	"Entertainment",
-	"Shopping",
-	"Family",
-	"Savings",
-	"Other",
+	"إيجار السكن",
+	"المواد الغذائية والوجبات",
+	"الملابس والأغراض الشخصية",
+	"السيارة والوقود",
+	"المواصلات العامة",
+	"دعم المنزل",
+	"الهدايا والالتزامات الاجتماعية",
+	"الزكاة والتبرعات",
+	"الزيارات والضيافة",
+	"التبغ والأركيلة",
+	"الخدمات",
+	"الصحة",
+	"التعليم",
+	"الترفيه",
+	"المدخرات",
+	"المتفرقات",
 ]
 
 DUMMY_EXCHANGE_RATES = [
@@ -116,10 +121,10 @@ def create_sample_budgets(user):
 	current = getdate(today())
 	month = calendar.month_name[current.month]
 	budgets = {
-		"Food": 1500000,
-		"Transport": 600000,
-		"Utilities": 900000,
-		"Entertainment": 450000,
+		"المواد الغذائية والوجبات": 1500000,
+		"المواصلات العامة": 600000,
+		"الخدمات": 900000,
+		"الترفيه": 450000,
 	}
 
 	for category, amount in budgets.items():
@@ -171,12 +176,12 @@ def create_sample_income(user):
 
 def create_sample_expenses(user):
 	rows = [
-		(-1, "Food", "Lunch and groceries", 85000, "SYP", "Cash", "DUMMY-PET-001"),
-		(-3, "Transport", "Taxi and bus rides", 22, "USD", "Wallet", "DUMMY-PET-002"),
-		(-7, "Utilities", "Internet bill", 18, "EUR", "Bank Transfer", "DUMMY-PET-003"),
-		(-16, "Entertainment", "Movie night", 125000, "SYP", "Card", "DUMMY-PET-004"),
-		(-35, "Health", "Pharmacy purchase", 12, "USD", "Cash", "DUMMY-PET-005"),
-		(-50, "Education", "Online course", 30, "EUR", "Card", "DUMMY-PET-006"),
+		(-1, "المواد الغذائية والوجبات", "Lunch and groceries", 85000, "SYP", "Cash", "DUMMY-PET-001"),
+		(-3, "المواصلات العامة", "Taxi and bus rides", 22, "USD", "Wallet", "DUMMY-PET-002"),
+		(-7, "الخدمات", "Internet bill", 18, "EUR", "Bank Transfer", "DUMMY-PET-003"),
+		(-16, "الترفيه", "Movie night", 125000, "SYP", "Card", "DUMMY-PET-004"),
+		(-35, "الصحة", "Pharmacy purchase", 12, "USD", "Cash", "DUMMY-PET-005"),
+		(-50, "التعليم", "Online course", 30, "EUR", "Card", "DUMMY-PET-006"),
 	]
 
 	for days, category, description, amount, currency, payment_method, reference_no in rows:

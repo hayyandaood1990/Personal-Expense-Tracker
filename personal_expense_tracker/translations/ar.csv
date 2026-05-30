@@ -69,6 +69,35 @@ Education,تعليم
 Entertainment,ترفيه
 Shopping,تسوق
 Family,العائلة
+Housing Rent,إيجار السكن
+Groceries & Meals,المواد الغذائية والوجبات
+Clothing & Personal Items,الملابس والأغراض الشخصية
+Vehicle & Fuel,السيارة والوقود
+Public Transport,المواصلات العامة
+Household Support,دعم المنزل
+Gifts & Social Obligations,الهدايا والالتزامات الاجتماعية
+Charity & Religious Giving,الزكاة والتبرعات
+Visits & Hospitality,الزيارات والضيافة
+Tobacco & Shisha,التبغ والأركيلة
+Miscellaneous,متفرقات
+Car Expenses,مصاريف السيارة
+Smoking,التدخين
+Home rent and housing lease payments.,إيجار المنزل ومدفوعات السكن.
+"Groceries, meals, snacks, drinks, and household food.",مواد غذائية ووجبات ومشروبات وطعام المنزل.
+"Clothes, shoes, accessories, and personal shopping.",ملابس وأحذية وإكسسوارات ومشتريات شخصية.
+"Fuel, vehicle maintenance, and personal car expenses.",وقود وصيانة ومصاريف السيارة الشخصية.
+"Public transport, taxis, buses, and shared rides.",مواصلات عامة وتكاسي وباصات وتنقلات مشتركة.
+"Household help, family support, and recurring home support payments.",مساعدة منزلية ودعم عائلي ومدفوعات دعم منزلية متكررة.
+"Gifts, Eid money, social occasions, and family obligations.",هدايا وعيديات ومناسبات اجتماعية والتزامات عائلية.
+"Zakat, charity, donations, and religious giving.",زكاة وصدقات وتبرعات وعطاء ديني.
+"Hospitality items for visits, guests, sweets, and hosted occasions.",مستلزمات ضيافة للزيارات والضيوف والحلويات والمناسبات المستضافة.
+"Cigarettes, shisha, tobacco, charcoal, and related items.",سجائر وأركيلة وتبغ وفحم ومستلزمات مرتبطة.
+"Electricity, water, gas, internet, and household services.",كهرباء وماء وغاز وإنترنت وخدمات منزلية.
+"Healthcare, medicine, pharmacy, doctor visits, and treatment.",رعاية صحية ودواء وصيدلية وزيارات طبيب وعلاج.
+"Courses, school, books, learning, and education fees.",دورات ومدرسة وكتب وتعلم ورسوم تعليمية.
+"Entertainment, leisure, outings, movies, and recreation.",ترفيه وراحة ومشاوير وأفلام ونشاطات ترفيهية.
+Money intentionally set aside and not treated as spending.,مال يتم تخصيصه للادخار ولا يعامل كمصروف.
+Rare uncategorized expenses that do not fit another category.,مصاريف نادرة غير مصنفة ولا تناسب فئة أخرى.
 Monthly Expense Summary,ملخص المصاريف الشهري
 Category Expense Summary,ملخص المصاريف حسب الفئة
 Currency Exposure Report,تقرير التعرض للعملات
