@@ -1,10 +1,17 @@
 frappe.ui.form.on("Monthly Budget", {
 	refresh(frm) {
 		frm.set_query("category", () => ({ filters: { is_active: 1 } }));
+		frm.set_query("budget_period", () => ({ filters: { status: "Open" } }));
 		frm.add_custom_button(__("Fetch Exchange Rate"), () => {
 			frm.trigger("fetch_exchange_rate");
 		});
+		frm.trigger("set_default_budget_period");
 		frm.trigger("calculate_budget_in_base");
+		frm.trigger("show_budget_status");
+	},
+
+	budget_period(frm) {
+		frm.trigger("sync_budget_period_fields");
 		frm.trigger("show_budget_status");
 	},
 
@@ -30,6 +37,41 @@ frappe.ui.form.on("Monthly Budget", {
 
 	category(frm) {
 		frm.trigger("show_budget_status");
+	},
+
+	set_default_budget_period(frm) {
+		if (!frm.is_new() || frm.doc.budget_period) {
+			return;
+		}
+
+		frappe.call({
+			method: "personal_expense_tracker.api.get_current_budget_period",
+			callback(r) {
+				if (r.message && r.message.name) {
+					frm.set_value("budget_period", r.message.name);
+				}
+			},
+		});
+	},
+
+	sync_budget_period_fields(frm) {
+		if (!frm.doc.budget_period) {
+			return;
+		}
+
+		frappe.db
+			.get_value("Budget Period", frm.doc.budget_period, ["from_date", "to_date", "month", "year"])
+			.then((r) => {
+				const values = r.message;
+				if (!values) {
+					return;
+				}
+
+				frm.set_value("from_date", values.from_date);
+				frm.set_value("to_date", values.to_date);
+				frm.set_value("month", values.month);
+				frm.set_value("year", values.year);
+			});
 	},
 
 	fetch_exchange_rate(frm) {
@@ -72,7 +114,7 @@ frappe.ui.form.on("Monthly Budget", {
 	},
 
 	show_budget_status(frm) {
-		if (!frm.doc.user || !frm.doc.month || !frm.doc.year || !frm.doc.category) {
+		if (!frm.doc.user || !frm.doc.budget_period || !frm.doc.category) {
 			return;
 		}
 
@@ -84,6 +126,7 @@ frappe.ui.form.on("Monthly Budget", {
 				year: frm.doc.year,
 				category: frm.doc.category,
 				budget_name: frm.doc.name,
+				budget_period: frm.doc.budget_period,
 			},
 			callback(r) {
 				if (!r.message) {

@@ -41,10 +41,9 @@ ARABIC_DESCRIPTIONS = {
 
 
 def execute():
-	ensure_arabic_categories()
-	rename_categories_to_arabic()
-	update_arabic_descriptions()
-	frappe.db.commit()
+	# Category document names must stay in English so Frappe can translate
+	# them per user language through translated_doctype + ar.csv.
+	return
 
 
 def ensure_arabic_categories():
@@ -86,20 +85,20 @@ def merge_category_metadata(old_name, new_name):
 	old_category = frappe.db.get_value(
 		"Expense Category",
 		old_name,
-		["monthly_budget", "budget_from_date", "budget_to_date"],
+		["monthly_budget"],
 		as_dict=True,
 	)
 	new_category = frappe.db.get_value(
 		"Expense Category",
 		new_name,
-		["monthly_budget", "budget_from_date", "budget_to_date"],
+		["monthly_budget"],
 		as_dict=True,
 	)
 	if not old_category or not new_category:
 		return
 
 	values = {}
-	for fieldname in ("monthly_budget", "budget_from_date", "budget_to_date"):
+	for fieldname in ("monthly_budget",):
 		if old_category.get(fieldname) and not new_category.get(fieldname):
 			values[fieldname] = old_category.get(fieldname)
 

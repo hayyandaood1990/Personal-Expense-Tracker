@@ -19,6 +19,10 @@ from personal_expense_tracker.utils import (
 	is_expense_manager,
 	validate_supported_currency,
 )
+from personal_expense_tracker.budget_period import (
+	get_budget_period_date_range,
+	get_budget_period_for_date,
+)
 
 DEFAULT_EXCHANGE_RATE_API_URL = "https://open.er-api.com/v6/latest/{base_currency}"
 DEFAULT_EXCHANGE_RATE_API_SOURCE = "open.er-api.com"
@@ -508,7 +512,7 @@ def get_category_expense_chart(from_date=None, to_date=None, user=None):
 	ordered = sorted(totals.items(), key=lambda item: item[1], reverse=True)
 	return {
 		"data": {
-			"labels": [row[0] for row in ordered],
+			"labels": [_(row[0]) for row in ordered],
 			"datasets": [{"name": _("Expenses"), "values": [row[1] for row in ordered]}],
 		},
 		"type": "donut",
@@ -516,10 +520,10 @@ def get_category_expense_chart(from_date=None, to_date=None, user=None):
 
 
 @frappe.whitelist()
-def get_monthly_budget_status(user=None, month=None, year=None, category=None, budget_name=None):
+def get_monthly_budget_status(
+	user=None, month=None, year=None, category=None, budget_name=None, budget_period=None
+):
 	user = resolve_user_filter(user)
-	month = month or calendar.month_name[getdate(nowdate()).month]
-	year = cint(year) or getdate(nowdate()).year
 
 	if not category:
 		return None
@@ -529,16 +533,36 @@ def get_monthly_budget_status(user=None, month=None, year=None, category=None, b
 		if not is_expense_manager() and budget.user != frappe.session.user:
 			frappe.throw(_("You are not permitted to view this budget."))
 	else:
+		period = None
+		if budget_period:
+			period = frappe.db.get_value(
+				"Budget Period",
+				budget_period,
+				["name", "month", "year"],
+				as_dict=True,
+			)
+		period = frappe._dict(period) if period else get_budget_period_for_date(create_if_missing=True)
 		budget_name = frappe.db.get_value(
 			"Monthly Budget",
-			{"user": user, "month": month, "year": year, "category": category},
+			{"user": user, "budget_period": period.name, "category": category},
 			"name",
 		)
+		if not budget_name:
+			month = month or period.month
+			year = cint(year) or period.year
+			budget_name = frappe.db.get_value(
+				"Monthly Budget",
+				{"user": user, "month": month, "year": year, "category": category},
+				"name",
+			)
 		if not budget_name:
 			return None
 		budget = frappe.get_doc("Monthly Budget", budget_name)
 
-	from_date, to_date = get_month_date_range(budget.month, budget.year)
+	if budget.budget_period:
+		from_date, to_date = get_budget_period_date_range(budget.budget_period)
+	else:
+		from_date, to_date = get_month_date_range(budget.month, budget.year)
 	rows = get_expense_rows(
 		user=budget.user,
 		from_date=from_date,
@@ -567,10 +591,19 @@ def get_monthly_budget_status(user=None, month=None, year=None, category=None, b
 
 
 @frappe.whitelist()
+def get_current_budget_period(posting_date=None):
+	return get_budget_period_for_date(period_date=posting_date, create_if_missing=True)
+
+
+def get_current_card_period(user=None):
+	period = get_budget_period_for_date(create_if_missing=True)
+	return getdate(period.from_date), getdate(period.to_date)
+
+
+@frappe.whitelist()
 def get_this_month_expenses_card(filters=None):
-	current = getdate(today())
-	start = current.replace(day=1)
-	end = current.replace(day=calendar.monthrange(current.year, current.month)[1])
+	user = None if is_expense_manager() else frappe.session.user
+	start, end = get_current_card_period(user)
 	summary = get_expense_summary(from_date=start, to_date=end, currency=BASE_CURRENCY)
 	return {"value": summary["total_expenses"], "fieldtype": "Currency", "options": BASE_CURRENCY}
 
@@ -583,38 +616,21 @@ def get_today_expenses_card(filters=None):
 
 @frappe.whitelist()
 def get_top_category_card(filters=None):
-	current = getdate(today())
-	start = current.replace(day=1)
-	end = current.replace(day=calendar.monthrange(current.year, current.month)[1])
-	chart = get_category_expense_chart(from_date=start, to_date=end)
+	user = None if is_expense_manager() else frappe.session.user
+	start, end = get_current_card_period(user)
+	chart = get_category_expense_chart(from_date=start, to_date=end, user=user)
 	labels = chart["data"]["labels"]
 	values = chart["data"]["datasets"][0]["values"]
 	if not labels:
 		return _("No expenses")
 
-	return "{0}: {1}".format(labels[0], fmt_money(values[0], currency=BASE_CURRENCY))
+	return "{0}: {1}".format(_(labels[0]), fmt_money(values[0], currency=BASE_CURRENCY))
 
 
 @frappe.whitelist()
 def get_budget_usage_card(filters=None):
-	current = getdate(today())
-	month = calendar.month_name[current.month]
 	user = None if is_expense_manager() else frappe.session.user
-	budget_filters = {"month": month, "year": current.year}
-	if user:
-		budget_filters["user"] = user
-
-	budgets = frappe.get_all(
-		"Monthly Budget",
-		filters=budget_filters,
-		fields=["name", "budget_in_base_currency", "category", "user"],
-	)
-
-	if not budgets:
-		return {"value": 0, "fieldtype": "Percent"}
-
-	total_budget = sum(flt(row.budget_in_base_currency) for row in budgets)
-	from_date, to_date = get_month_date_range(month, current.year)
+	from_date, to_date = get_current_card_period(user)
 	rows = get_expense_rows(user=user, from_date=from_date, to_date=to_date)
 	income_rows = get_income_rows(user=user, from_date=from_date, to_date=to_date)
 	spent = get_total_in_currency(rows, BASE_CURRENCY)
@@ -625,10 +641,8 @@ def get_budget_usage_card(filters=None):
 
 @frappe.whitelist()
 def get_remaining_budget_card(filters=None):
-	current = getdate(today())
-	month = calendar.month_name[current.month]
 	user = None if is_expense_manager() else frappe.session.user
-	from_date, to_date = get_month_date_range(month, current.year)
+	from_date, to_date = get_current_card_period(user)
 	expense_rows = get_expense_rows(user=user, from_date=from_date, to_date=to_date)
 	income_rows = get_income_rows(user=user, from_date=from_date, to_date=to_date)
 	spent = get_total_in_currency(expense_rows, BASE_CURRENCY)

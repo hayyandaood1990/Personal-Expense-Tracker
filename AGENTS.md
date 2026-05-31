@@ -10,7 +10,7 @@
 - User-facing app name: `Personal Expense Tracker`
 - GitHub repo: `https://github.com/hayyandaood1990/Personal-Expense-Tracker`
 
-This is a Frappe app for personal expense tracking. It lets users record income and expenses, group expenses by a professional category structure, manage monthly budgets, store exchange rates, convert amounts into a base currency, and view dashboards/reports.
+This is a Frappe app for personal expense tracking. It lets users record income and expenses, group expenses by a professional translated category structure, manage budget periods and monthly budgets, store exchange rates, convert amounts into a base currency, and view dashboards/reports.
 
 ## Core Features
 
@@ -18,10 +18,14 @@ This is a Frappe app for personal expense tracking. It lets users record income 
 - Income entry tracking for paychecks and other income sources.
 - Supported currencies: `SYP`, `USD`, `EUR`.
 - Default base currency: `SYP`.
-- Professional category management with parent categories, active/inactive state, monthly budget reference, and optional budget date window.
-- Monthly budgets per user, month, year, and category.
-- Monthly budgets cannot exceed that user's total income for the same month.
-- Expenses reduce monthly income; dashboards expose income left after expenses.
+- Professional category management with parent categories, active/inactive state, and monthly budget reference.
+- Expense Category is a translated DocType: stored names are English, Arabic UI displays Arabic translations.
+- Budget Period management for non-calendar opening periods and normal monthly periods.
+- Opening budget period: `2026-05-23` to `2026-06-30`.
+- From `2026-07-01` onward, budget periods are normal calendar months.
+- Monthly budgets per user, budget period, and category.
+- Monthly budgets cannot exceed that user's total income for the same budget period.
+- Expenses reduce period income; dashboards expose income left after expenses.
 - Currency exchange rates with effective dates and source notes.
 - Live exchange-rate sync from SP Today public pages:
   - `https://sp-today.com/en/currency/us-dollar`
@@ -30,8 +34,8 @@ This is a Frappe app for personal expense tracking. It lets users record income 
 - Personal Expenses workspace with number cards, charts, and shortcuts.
 - Website dashboard route at `/expense-tracker`.
 - Script reports for monthly summary, category summary, expense entry summary, currency exposure, and income-vs-expense comparison.
-- Remaining monthly income is reported as a Savings planning value; do not auto-create a Savings expense unless the user explicitly asks, because that would change expense totals.
-- Dummy data for categories, exchange rates, income, budgets, and sample expenses.
+- Remaining period income is reported as a Savings planning value; do not auto-create a Savings expense unless the user explicitly asks, because that would change expense totals.
+- Dummy data for categories, budget periods, exchange rates, income, budgets, and sample expenses.
 
 ## Important Doctypes
 
@@ -44,15 +48,38 @@ Fields include:
 - `parent_category`
 - `is_active`
 - `monthly_budget`
-- `budget_from_date`
-- `budget_to_date`
 - `description`
 
 Important validation:
 - Prevent duplicate active category names.
 - Prevent selecting itself as parent category.
-- Budget From Date cannot be after Budget To Date.
-- Expense entries and monthly budgets honor the category budget date window when present.
+- Category document names are stored in English and translated with `translated_doctype`.
+- Do not add budget cycle dates here; budget windows belong to Budget Period.
+
+### Budget Period
+
+Path: `personal_expense_tracker/personal_expense_tracker/doctype/budget_period`
+
+Fields include:
+- `period_name`
+- `status`
+- `from_date`
+- `to_date`
+- `month`
+- `year`
+- `is_opening_period`
+- `auto_created`
+- `notes`
+
+Important behavior:
+- Budget Period is the source of truth for budget windows.
+- Periods cannot overlap.
+- Opening period is `23-05-2026 to 30-06-2026`.
+- Normal periods are auto-created by date, for example `July 2026` from `2026-07-01` to `2026-07-31`.
+- Helper file: `personal_expense_tracker/budget_period.py`.
+- Important helpers:
+  - `get_budget_period_for_date(period_date=None, create_if_missing=True)`
+  - `get_budget_period_date_range(budget_period)`
 
 ### Income Entry
 
@@ -140,6 +167,9 @@ Path: `personal_expense_tracker/personal_expense_tracker/doctype/monthly_budget`
 
 Fields include:
 - `user`
+- `budget_period`
+- `from_date`
+- `to_date`
 - `month`
 - `year`
 - `category`
@@ -150,10 +180,12 @@ Fields include:
 
 Important validation:
 - Budget amount must be greater than zero.
-- Unique budget per user, month, year, and category.
+- Unique budget per user, budget period, and category.
 - Budget amount is converted into base currency.
-- Total monthly budgets for a user cannot exceed that user's total Income Entry amount for the same month.
-- The category budget date window must allow the selected month.
+- Total budgets for a user cannot exceed that user's total Income Entry amount for the same budget period.
+- `budget_period` defaults to the current active period.
+- `from_date`, `to_date`, `month`, and `year` sync from the selected Budget Period.
+- `month` and `year` remain for display/backward compatibility, but Budget Period is the real period key.
 
 ## Roles And Permissions
 
@@ -180,7 +212,8 @@ Important whitelisted methods:
 - `get_income_summary(user=None, from_date=None, to_date=None, currency="SYP")`
 - `get_monthly_expense_chart(year=None, user=None)`
 - `get_category_expense_chart(from_date=None, to_date=None, user=None)`
-- `get_monthly_budget_status(user=None, month=None, year=None, category=None, budget_name=None)`
+- `get_current_budget_period(posting_date=None)`
+- `get_monthly_budget_status(user=None, month=None, year=None, category=None, budget_name=None, budget_period=None)`
 - `get_this_month_expenses_card(filters=None)`
 - `get_today_expenses_card(filters=None)`
 - `get_top_category_card(filters=None)`
@@ -188,8 +221,9 @@ Important whitelisted methods:
 - `get_remaining_budget_card(filters=None)`
 
 Budget card behavior:
-- `get_budget_usage_card` returns the percent of monthly income spent, not percent of category budgets used.
-- `get_remaining_budget_card` returns total monthly income minus monthly expenses as a `SYP` currency value.
+- Workspace cards use the current active Budget Period.
+- `get_budget_usage_card` returns the percent of current-period income spent, not percent of category budgets used.
+- `get_remaining_budget_card` returns current-period income minus current-period expenses as a `SYP` currency value.
 
 SP Today sync notes:
 - Defaults to `sell` rate.
@@ -250,8 +284,8 @@ Workspace cards:
 - Remaining Budget
 
 Card math:
-- Budget Usage = current-month expenses / current-month income * 100.
-- Remaining Budget = current-month income - current-month expenses.
+- Budget Usage = current Budget Period expenses / current Budget Period income * 100.
+- Remaining Budget = current Budget Period income - current Budget Period expenses.
 - For Expense Managers the cards use all visible users; for normal users they use only the session user's records.
 
 Charts:
@@ -259,8 +293,9 @@ Charts:
 - Expenses by Category
 - Expenses by Currency
 
-Known fix:
-- `get_budget_usage_card` should calculate all visible budgets/expenses for Expense Managers, but only the current user's data for normal users.
+Visibility behavior:
+- Expense Managers see all visible users in workspace card totals.
+- Normal users see only their own records in workspace card totals.
 
 ## Website Dashboard
 
@@ -276,7 +311,8 @@ Files:
 Behavior:
 - Requires login and redirects guests to `/login?redirect-to=/expense-tracker`.
 - Reads live Expense Entry, Monthly Budget, category, currency, and recent expense data.
-- Reads live Income Entry totals and subtracts expenses from monthly income.
+- Uses the current active Budget Period for the dashboard window.
+- Reads live Income Entry totals and subtracts expenses from current-period income.
 - Shows a full website dashboard with animated canvas background, metric cards, monthly chart, category donut, currency exposure bars, income-aware budget pulse, and recent expense links.
 
 ## Dummy Data
@@ -284,23 +320,28 @@ Behavior:
 Installer/dummy data file:
 - `personal_expense_tracker/install.py`
 
-Default professional categories are stored as Arabic `Expense Category` document names so Link fields display Arabic values:
-- إيجار السكن
-- المواد الغذائية والوجبات
-- الملابس والأغراض الشخصية
-- السيارة والوقود
-- المواصلات العامة
-- دعم المنزل
-- الهدايا والالتزامات الاجتماعية
-- الزكاة والتبرعات
-- الزيارات والضيافة
-- التبغ والأركيلة
-- الخدمات
-- الصحة
-- التعليم
-- الترفيه
-- المدخرات
-- المتفرقات
+Default professional categories are stored as English `Expense Category` document names and translated into Arabic through `personal_expense_tracker/translations/ar.csv`:
+- Housing Rent
+- Groceries & Meals
+- Clothing & Personal Items
+- Vehicle & Fuel
+- Public Transport
+- Household Support
+- Gifts & Social Obligations
+- Charity & Religious Giving
+- Visits & Hospitality
+- Tobacco & Shisha
+- Utilities
+- Health
+- Education
+- Entertainment
+- Savings
+- Miscellaneous
+
+Default opening Budget Period:
+- `23-05-2026 to 30-06-2026`
+
+Monthly Budget records link to this opening period until the app reaches the first normal monthly period beginning `2026-07-01`.
 
 Reload dummy data:
 
@@ -377,6 +418,7 @@ Prefer `--force-with-lease` over plain force push.
 - Use controllers for validation.
 - Use `frappe.throw` with translatable strings via `_()`.
 - Use helpers from `personal_expense_tracker/utils.py` for currency validation, conversion, month ranges, and manager checks.
+- Use helpers from `personal_expense_tracker/budget_period.py` for budget period selection, creation, and date ranges.
 - Do not hardcode a site name in app code.
 - Keep currencies centralized through `SUPPORTED_CURRENCIES`.
 - After changing Python methods used by Desk, run `clear-cache` and reload Gunicorn if needed.

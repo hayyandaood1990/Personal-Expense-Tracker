@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import calendar
 from collections import defaultdict
 
 import frappe
@@ -8,11 +7,11 @@ from frappe import _
 from frappe.utils import flt, fmt_money, getdate, today
 
 from personal_expense_tracker.api import get_expense_rows, get_income_rows
+from personal_expense_tracker.budget_period import get_budget_period_for_date
 from personal_expense_tracker.utils import (
 	BASE_CURRENCY,
 	MONTHS,
 	convert_amount,
-	get_month_date_range,
 	is_expense_manager,
 )
 
@@ -27,8 +26,10 @@ def get_context(context):
 		raise frappe.Redirect
 
 	current = getdate(today())
-	month = calendar.month_name[current.month]
-	from_date, to_date = get_month_date_range(month, current.year)
+	period = get_budget_period_for_date(current, create_if_missing=True)
+	month = period.month
+	from_date = period.from_date
+	to_date = period.to_date
 	user = None if is_expense_manager() else frappe.session.user
 
 	current_month_rows = get_expense_rows(user=user, from_date=from_date, to_date=to_date)
@@ -43,6 +44,7 @@ def get_context(context):
 	page_data = build_page_data(
 		current=current,
 		month=month,
+		period=period,
 		from_date=from_date,
 		to_date=to_date,
 		user=user,
@@ -72,6 +74,7 @@ def get_context(context):
 def build_page_data(
 	current,
 	month,
+	period,
 	from_date,
 	to_date,
 	user,
@@ -86,13 +89,13 @@ def build_page_data(
 	category_totals = get_category_totals(current_month_rows)
 	currency_totals = get_currency_totals(current_month_rows)
 	monthly_totals = get_monthly_totals(year_rows)
-	budget_status = get_budget_status(user, month, current.year, current_month_rows, current_month_income_rows)
+	budget_status = get_budget_status(user, period, current_month_rows, current_month_income_rows)
 	top_category = get_top_category(category_totals)
 	recent_expenses = get_recent_expenses(user)
 
 	return {
 		"generated_on": today(),
-		"period_label": f"{month} {current.year}",
+		"period_label": period.name,
 		"base_currency": BASE_CURRENCY,
 		"month_total": month_total,
 		"month_total_display": fmt_money(month_total, currency=BASE_CURRENCY),
@@ -155,7 +158,7 @@ def get_category_totals(rows):
 	ordered = sorted(totals.items(), key=lambda item: item[1], reverse=True)
 	return [
 		{
-			"label": category,
+			"label": _(category or ""),
 			"value": flt(value, 2),
 			"display": fmt_money(value, currency=BASE_CURRENCY),
 		}
@@ -201,8 +204,8 @@ def get_monthly_totals(rows):
 	return [flt(value, 2) for value in values]
 
 
-def get_budget_status(user, month, year, rows, income_rows):
-	budget_filters = {"month": month, "year": year}
+def get_budget_status(user, period, rows, income_rows):
+	budget_filters = {"budget_period": period.name}
 	if user:
 		budget_filters["user"] = user
 
@@ -270,7 +273,7 @@ def get_recent_expenses(user):
 		{
 			"name": row.get("name"),
 			"date": row.get("posting_date"),
-			"category": row.get("category"),
+			"category": _(row.get("category") or ""),
 			"description": row.get("description"),
 			"amount": fmt_money(row.get("amount"), currency=row.get("currency")),
 			"base_amount": fmt_money(

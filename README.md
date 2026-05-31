@@ -1,24 +1,25 @@
 # Personal Expense Tracker
 
-A Frappe Framework v16 app for personal income and expense tracking, monthly budgets, savings planning, categories, and multi-currency conversion.
+A Frappe Framework v16 app for personal income and expense tracking, budget periods, monthly budgets, savings planning, translated categories, and multi-currency conversion.
 
 ## Features
 
-- Professional expense categories with active/inactive status and monthly budget reference
+- Professional expense categories with active/inactive status and translated Link display
 - Income entries for paychecks, freelance income, gifts, investments, and other income
 - Expense entries in SYP, USD, and EUR
 - Currency exchange rates with effective dates
 - Live exchange-rate sync for SYP, USD, and EUR
-- Monthly budgets per user, month, year, and category
-- Budget usage is calculated against monthly income so expenses reduce available income
-- Remaining income is shown as a Savings value for month-end planning
+- Budget periods with an opening period and automatic monthly periods afterward
+- Monthly budgets per user, budget period, and category
+- Budget usage is calculated against period income so expenses reduce available income
+- Remaining income is shown as a Savings value for period-end planning
 - Expense User and Expense Manager roles
 - Permission filters so normal users only see their own income, expenses, and budgets
 - Client-side exchange-rate fetching and base-currency calculation
 - Script reports for monthly, category, entry-level, currency exposure, and income-vs-expense summaries
 - Personal Expenses workspace with dashboard widgets, including Remaining Budget in currency value
 - Website dashboard at `/expense-tracker`
-- Dummy categories, exchange rates, income, budgets, and sample expenses
+- Dummy categories, budget periods, exchange rates, income, budgets, and sample expenses
 
 ## Installation
 
@@ -37,11 +38,54 @@ bench --site your-site-name install-app personal_expense_tracker
 bench --site your-site-name migrate
 ```
 
+## Budget Periods
+
+Budget periods are the source of truth for budget windows.
+
+The app creates a one-time opening period for the first cycle:
+
+```text
+23-05-2026 to 30-06-2026
+```
+
+After the opening period, periods are generated month by month. For example:
+
+```text
+July 2026: 2026-07-01 to 2026-07-31
+```
+
+Monthly Budget records link to a Budget Period and copy its `from_date`, `to_date`, `month`, and `year` for reporting and filtering. Categories do not store budget date windows anymore; categories are permanent master data.
+
+Workspace cards and the website dashboard use the current active Budget Period:
+
+- This Month Expenses = expenses in the current Budget Period
+- Budget Usage = current-period expenses / current-period income * 100
+- Remaining Budget = current-period income - current-period expenses
+
 ## Dummy Data
 
 The installer creates default roles, professional categories, placeholder exchange rates, sample income, sample budgets, and sample expenses. A `Savings` category is included for tracking money left after monthly expenses.
 
-Default categories are stored in Arabic so they appear in Arabic inside Link fields: إيجار السكن، المواد الغذائية والوجبات، الملابس والأغراض الشخصية، السيارة والوقود، المواصلات العامة، دعم المنزل، الهدايا والالتزامات الاجتماعية، الزكاة والتبرعات، الزيارات والضيافة، التبغ والأركيلة، الخدمات، الصحة، التعليم، الترفيه، المدخرات، والمتفرقات.
+Default category document names are stored in English and translated through Frappe's translated DocType behavior. They display in Arabic when the user language is Arabic, and in English when the user language is English.
+
+Default categories:
+
+- Housing Rent
+- Groceries & Meals
+- Clothing & Personal Items
+- Vehicle & Fuel
+- Public Transport
+- Household Support
+- Gifts & Social Obligations
+- Charity & Religious Giving
+- Visits & Hospitality
+- Tobacco & Shisha
+- Utilities
+- Health
+- Education
+- Entertainment
+- Savings
+- Miscellaneous
 
 To reload dummy data for a user:
 
@@ -109,7 +153,7 @@ The Personal Expenses workspace includes these number cards:
 - Budget Usage
 - Remaining Budget
 
-`Budget Usage` shows the percentage of income spent. `Remaining Budget` shows the actual money left from monthly income after expenses.
+`Budget Usage` shows the percentage of current-period income spent. `Remaining Budget` shows the actual money left from current-period income after expenses.
 
 ## Website Dashboard
 

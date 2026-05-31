@@ -11,9 +11,6 @@
   "parent_category",
   "is_active",
   "monthly_budget",
-  "budget_period_section",
-  "budget_from_date",
-  "budget_to_date",
   "description"
  ],
  "fields": [
@@ -43,23 +40,6 @@
    "fieldname": "monthly_budget",
    "fieldtype": "Currency",
    "label": "Monthly Budget"
-  },
-  {
-   "fieldname": "budget_period_section",
-   "fieldtype": "Section Break",
-   "label": "Budget Period"
-  },
-  {
-   "fieldname": "budget_from_date",
-   "fieldtype": "Date",
-   "label": "Budget From Date",
-   "in_standard_filter": 1
-  },
-  {
-   "fieldname": "budget_to_date",
-   "fieldtype": "Date",
-   "label": "Budget To Date",
-   "in_standard_filter": 1
   },
   {
    "fieldname": "description",
@@ -100,6 +80,7 @@
  "sort_order": "DESC",
  "states": [],
  "track_changes": 1,
+ "translated_doctype": 1,
  "autoname": "field:category_name",
  "naming_rule": "By fieldname",
  "title_field": "category_name",

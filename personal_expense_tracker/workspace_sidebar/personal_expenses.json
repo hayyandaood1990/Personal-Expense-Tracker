@@ -79,6 +79,18 @@
   },
   {
    "type": "Link",
+   "label": "Budget Period",
+   "link_type": "DocType",
+   "link_to": "Budget Period",
+   "icon": "",
+   "child": 1,
+   "collapsible": 1,
+   "indent": 0,
+   "keep_closed": 0,
+   "show_arrow": 0
+  },
+  {
+   "type": "Link",
    "label": "Currency Exchange Rate",
    "link_type": "DocType",
    "link_to": "Currency Exchange Rate",

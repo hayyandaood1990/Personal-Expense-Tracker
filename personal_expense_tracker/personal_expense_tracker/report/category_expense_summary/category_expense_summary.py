@@ -75,7 +75,7 @@ def get_data(filters, currency):
 def get_chart(data):
 	return {
 		"data": {
-			"labels": [row["category"] for row in data],
+			"labels": [_(row["category"] or "") for row in data],
 			"datasets": [{"name": _("Expenses"), "values": [flt(row["total_expenses"]) for row in data]}],
 		},
 		"type": "donut",

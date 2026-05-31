@@ -1,29 +1,28 @@
 from __future__ import annotations
 
-import calendar
-
 import frappe
 from frappe.utils import add_days, flt, getdate, today
 
+from personal_expense_tracker.budget_period import get_budget_period_for_date
 from personal_expense_tracker.utils import BASE_CURRENCY, get_latest_rate_record
 
 DEFAULT_CATEGORIES = [
-	"إيجار السكن",
-	"المواد الغذائية والوجبات",
-	"الملابس والأغراض الشخصية",
-	"السيارة والوقود",
-	"المواصلات العامة",
-	"دعم المنزل",
-	"الهدايا والالتزامات الاجتماعية",
-	"الزكاة والتبرعات",
-	"الزيارات والضيافة",
-	"التبغ والأركيلة",
-	"الخدمات",
-	"الصحة",
-	"التعليم",
-	"الترفيه",
-	"المدخرات",
-	"المتفرقات",
+	"Housing Rent",
+	"Groceries & Meals",
+	"Clothing & Personal Items",
+	"Vehicle & Fuel",
+	"Public Transport",
+	"Household Support",
+	"Gifts & Social Obligations",
+	"Charity & Religious Giving",
+	"Visits & Hospitality",
+	"Tobacco & Shisha",
+	"Utilities",
+	"Health",
+	"Education",
+	"Entertainment",
+	"Savings",
+	"Miscellaneous",
 ]
 
 DUMMY_EXCHANGE_RATES = [
@@ -62,6 +61,7 @@ def create_dummy_data(user: str | None = None):
 		user = "Administrator"
 
 	create_default_categories()
+	create_default_budget_period()
 	create_dummy_exchange_rates()
 	create_sample_income(user)
 	create_sample_budgets(user)
@@ -83,6 +83,10 @@ def create_default_categories():
 			}
 		)
 		category.insert(ignore_permissions=True)
+
+
+def create_default_budget_period():
+	get_budget_period_for_date(create_if_missing=True)
 
 
 def create_dummy_exchange_rates():
@@ -119,18 +123,19 @@ def create_dummy_exchange_rates():
 
 def create_sample_budgets(user):
 	current = getdate(today())
-	month = calendar.month_name[current.month]
+	period = get_budget_period_for_date(current, create_if_missing=True)
+	month = period.month
 	budgets = {
-		"المواد الغذائية والوجبات": 1500000,
-		"المواصلات العامة": 600000,
-		"الخدمات": 900000,
-		"الترفيه": 450000,
+		"Groceries & Meals": 1500000,
+		"Public Transport": 600000,
+		"Utilities": 900000,
+		"Entertainment": 450000,
 	}
 
 	for category, amount in budgets.items():
 		if frappe.db.exists(
 			"Monthly Budget",
-			{"user": user, "month": month, "year": current.year, "category": category},
+			{"user": user, "budget_period": period.name, "category": category},
 		):
 			continue
 
@@ -138,8 +143,9 @@ def create_sample_budgets(user):
 			{
 				"doctype": "Monthly Budget",
 				"user": user,
+				"budget_period": period.name,
 				"month": month,
-				"year": current.year,
+				"year": period.year,
 				"category": category,
 				"budget_amount": amount,
 				"currency": BASE_CURRENCY,
@@ -176,12 +182,12 @@ def create_sample_income(user):
 
 def create_sample_expenses(user):
 	rows = [
-		(-1, "المواد الغذائية والوجبات", "Lunch and groceries", 85000, "SYP", "Cash", "DUMMY-PET-001"),
-		(-3, "المواصلات العامة", "Taxi and bus rides", 22, "USD", "Wallet", "DUMMY-PET-002"),
-		(-7, "الخدمات", "Internet bill", 18, "EUR", "Bank Transfer", "DUMMY-PET-003"),
-		(-16, "الترفيه", "Movie night", 125000, "SYP", "Card", "DUMMY-PET-004"),
-		(-35, "الصحة", "Pharmacy purchase", 12, "USD", "Cash", "DUMMY-PET-005"),
-		(-50, "التعليم", "Online course", 30, "EUR", "Card", "DUMMY-PET-006"),
+		(-1, "Groceries & Meals", "Lunch and groceries", 85000, "SYP", "Cash", "DUMMY-PET-001"),
+		(-3, "Public Transport", "Taxi and bus rides", 22, "USD", "Wallet", "DUMMY-PET-002"),
+		(-7, "Utilities", "Internet bill", 18, "EUR", "Bank Transfer", "DUMMY-PET-003"),
+		(-16, "Entertainment", "Movie night", 125000, "SYP", "Card", "DUMMY-PET-004"),
+		(-35, "Health", "Pharmacy purchase", 12, "USD", "Cash", "DUMMY-PET-005"),
+		(-50, "Education", "Online course", 30, "EUR", "Card", "DUMMY-PET-006"),
 	]
 
 	for days, category, description, amount, currency, payment_method, reference_no in rows:

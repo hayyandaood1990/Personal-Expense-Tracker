@@ -24,7 +24,6 @@ class ExpenseEntry(Document):
 		self.validate_currencies()
 		self.validate_exchange_rate()
 		self.validate_posting_date()
-		self.validate_category_budget_period()
 		self.validate_user_access()
 		self.calculate_amount_in_base_currency()
 
@@ -56,33 +55,6 @@ class ExpenseEntry(Document):
 
 		if self.user != frappe.session.user:
 			frappe.throw(_("You can only create or update Expense Entries for your own user."))
-
-	def validate_category_budget_period(self):
-		if not self.category or not self.posting_date:
-			return
-
-		category = frappe.db.get_value(
-			"Expense Category",
-			self.category,
-			["budget_from_date", "budget_to_date"],
-			as_dict=True,
-		)
-		if not category:
-			return
-
-		posting_date = getdate(self.posting_date)
-		if category.budget_from_date and posting_date < getdate(category.budget_from_date):
-			frappe.throw(
-				_("Category {0} can only be used from {1}.").format(
-					self.category, category.budget_from_date
-				)
-			)
-		if category.budget_to_date and posting_date > getdate(category.budget_to_date):
-			frappe.throw(
-				_("Category {0} can only be used until {1}.").format(
-					self.category, category.budget_to_date
-				)
-			)
 
 	def calculate_amount_in_base_currency(self):
 		self.amount_in_base_currency = flt(self.amount) * flt(self.exchange_rate_to_base)

@@ -15,6 +15,13 @@ Expense Category,فئة المصروف
 Expense Entry,قيد مصروف
 Currency Exchange Rate,سعر صرف العملة
 Monthly Budget,الميزانية الشهرية
+Budget Period,فترة الميزانية
+Period Name,اسم الفترة
+Status,الحالة
+Open,مفتوحة
+Closed,مغلقة
+Is Opening Period,فترة افتتاحية
+Auto Created,منشأة تلقائياً
 Category Name,اسم الفئة
 Parent Category,الفئة الأب
 Is Active,نشط
@@ -79,7 +86,7 @@ Gifts & Social Obligations,الهدايا والالتزامات الاجتما�
 Charity & Religious Giving,الزكاة والتبرعات
 Visits & Hospitality,الزيارات والضيافة
 Tobacco & Shisha,التبغ والأركيلة
-Miscellaneous,متفرقات
+Miscellaneous,المتفرقات
 Car Expenses,مصاريف السيارة
 Smoking,التدخين
 Home rent and housing lease payments.,إيجار المنزل ومدفوعات السكن.
@@ -187,7 +194,6 @@ Budget Amount must be greater than zero.,يجب أن يكون مبلغ المي�
 Currency must be one of: {0},يجب أن تكون العملة واحدة من: {0}
 "A Monthly Budget already exists for {0}, {1} {2}, and category {3}.",توجد ميزانية شهرية مسبقاً لـ {0}، {1} {2}، والفئة {3}.
 Income Entry,قيد دخل
-Budget Period,فترة الميزانية
 Budget From Date,تاريخ بداية الميزانية
 Budget To Date,تاريخ نهاية الميزانية
 Income Source,مصدر الدخل
@@ -197,7 +203,7 @@ Paycheck,راتب
 Freelance,عمل حر
 Gift,هدية
 Investment,استثمار
-Savings,مدخرات
+Savings,المدخرات
 Monthly Income,الدخل الشهري
 Income,الدخل
 left after expenses,متبقٍ بعد المصاريف

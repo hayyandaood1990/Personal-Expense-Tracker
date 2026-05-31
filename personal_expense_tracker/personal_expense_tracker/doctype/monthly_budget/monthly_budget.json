@@ -8,6 +8,9 @@
  "engine": "InnoDB",
  "field_order": [
   "user",
+  "budget_period",
+  "from_date",
+  "to_date",
   "month",
   "year",
   "category",
@@ -30,12 +33,34 @@
    "in_standard_filter": 1
   },
   {
+   "fieldname": "budget_period",
+   "fieldtype": "Link",
+   "label": "Budget Period",
+   "options": "Budget Period",
+   "reqd": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "read_only": 1,
+   "in_standard_filter": 1
+  },
+  {
    "fieldname": "month",
    "fieldtype": "Select",
    "label": "Month",
    "options": "January\nFebruary\nMarch\nApril\nMay\nJune\nJuly\nAugust\nSeptember\nOctober\nNovember\nDecember",
    "reqd": 1,
-   "in_list_view": 1,
    "in_standard_filter": 1
   },
   {
@@ -133,5 +158,5 @@
  "track_changes": 1,
  "autoname": "format:PET-BUD-{year}-{month}-{#####}",
  "title_field": "category",
- "search_fields": "user,month,year,category"
+ "search_fields": "user,budget_period,month,year,category"
 }

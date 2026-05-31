@@ -4,14 +4,17 @@
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import cint, flt, getdate
+from frappe.utils import cint, flt
 
 from personal_expense_tracker.utils import (
 	BASE_CURRENCY,
 	MONTHS,
 	SUPPORTED_CURRENCIES,
-	get_month_date_range,
 	is_expense_manager,
+)
+from personal_expense_tracker.budget_period import (
+	get_budget_period_date_range,
+	get_budget_period_for_date,
 )
 
 
@@ -23,6 +26,8 @@ class MonthlyBudget(Document):
 		if self.currency == BASE_CURRENCY:
 			self.exchange_rate_to_base = 1
 
+		self.set_default_budget_period()
+		self.sync_budget_period_fields()
 		self.calculate_budget_in_base_currency()
 
 	def validate(self):
@@ -32,8 +37,33 @@ class MonthlyBudget(Document):
 		self.validate_currency()
 		self.validate_unique_budget()
 		self.calculate_budget_in_base_currency()
-		self.validate_category_budget_period()
 		self.validate_budget_total_against_income()
+
+	def set_default_budget_period(self):
+		if self.budget_period:
+			return
+
+		period = get_budget_period_for_date(create_if_missing=True)
+		if period:
+			self.budget_period = period.name
+
+	def sync_budget_period_fields(self):
+		if not self.budget_period:
+			return
+
+		period = frappe.db.get_value(
+			"Budget Period",
+			self.budget_period,
+			["from_date", "to_date", "month", "year"],
+			as_dict=True,
+		)
+		if not period:
+			frappe.throw(_("Budget Period {0} does not exist.").format(self.budget_period))
+
+		self.from_date = period.from_date
+		self.to_date = period.to_date
+		self.month = period.month
+		self.year = period.year
 
 	def validate_user_access(self):
 		if is_expense_manager() or frappe.session.user == "Administrator":
@@ -43,6 +73,9 @@ class MonthlyBudget(Document):
 			frappe.throw(_("You can only create or update Monthly Budgets for your own user."))
 
 	def validate_period(self):
+		if not self.budget_period:
+			frappe.throw(_("Budget Period is required."))
+
 		if self.month not in MONTHS:
 			frappe.throw(_("Month must be a valid month name."))
 
@@ -63,58 +96,30 @@ class MonthlyBudget(Document):
 	def validate_unique_budget(self):
 		filters = {
 			"user": self.user,
-			"month": self.month,
-			"year": self.year,
+			"budget_period": self.budget_period,
 			"category": self.category,
 			"name": ["!=", self.name],
 		}
 		if frappe.db.exists("Monthly Budget", filters):
 			frappe.throw(
-				_("A Monthly Budget already exists for {0}, {1} {2}, and category {3}.").format(
-					self.user, self.month, self.year, self.category
-				)
-			)
-
-	def validate_category_budget_period(self):
-		if not self.category or not self.month or not self.year:
-			return
-
-		category = frappe.db.get_value(
-			"Expense Category",
-			self.category,
-			["budget_from_date", "budget_to_date"],
-			as_dict=True,
-		)
-		if not category:
-			return
-
-		month_start, month_end = get_month_date_range(self.month, self.year)
-		if category.budget_from_date and month_end < getdate(category.budget_from_date):
-			frappe.throw(
-				_("Category {0} budget can only start from {1}.").format(
-					self.category, category.budget_from_date
-				)
-			)
-		if category.budget_to_date and month_start > getdate(category.budget_to_date):
-			frappe.throw(
-				_("Category {0} budget can only be used until {1}.").format(
-					self.category, category.budget_to_date
+				_("A Monthly Budget already exists for {0}, period {1}, and category {2}.").format(
+					self.user, self.budget_period, self.category
 				)
 			)
 
 	def validate_budget_total_against_income(self):
-		if not self.user or not self.month or not self.year:
+		if not self.user or not self.budget_period:
 			return
 
 		if not frappe.db.exists("DocType", "Income Entry"):
 			return
 
-		month_start, month_end = get_month_date_range(self.month, self.year)
+		from_date, to_date = get_budget_period_date_range(self.budget_period)
 		income_rows = frappe.get_all(
 			"Income Entry",
 			filters={
 				"user": self.user,
-				"posting_date": ["between", [month_start, month_end]],
+				"posting_date": ["between", [from_date, to_date]],
 			},
 			fields=["income_in_base_currency"],
 		)
@@ -124,8 +129,7 @@ class MonthlyBudget(Document):
 			"Monthly Budget",
 			filters={
 				"user": self.user,
-				"month": self.month,
-				"year": self.year,
+				"budget_period": self.budget_period,
 				"name": ["!=", self.name],
 			},
 			fields=["budget_in_base_currency"],
@@ -136,12 +140,11 @@ class MonthlyBudget(Document):
 		if total_budget > total_income:
 			frappe.throw(
 				_(
-					"Total monthly budgets ({0}) cannot be greater than total monthly income ({1}) for {2} {3}."
+					"Total budgets ({0}) cannot be greater than total income ({1}) for budget period {2}."
 				).format(
 					frappe.bold(f"{BASE_CURRENCY} {total_budget:,.2f}"),
 					frappe.bold(f"{BASE_CURRENCY} {total_income:,.2f}"),
-					self.month,
-					self.year,
+					self.budget_period,
 				)
 			)
 

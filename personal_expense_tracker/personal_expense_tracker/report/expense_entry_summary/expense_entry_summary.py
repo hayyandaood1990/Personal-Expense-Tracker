@@ -119,7 +119,7 @@ def get_chart(data):
 
 	return {
 		"data": {
-			"labels": list(grouped),
+			"labels": [_(category or "") for category in grouped],
 			"datasets": [{"name": _("Base Amount"), "values": [flt(value) for value in grouped.values()]}],
 		},
 		"type": "bar",
