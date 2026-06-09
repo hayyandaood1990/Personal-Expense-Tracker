@@ -8,14 +8,14 @@ A Frappe Framework v16 app for personal income and expense tracking, budget peri
 - Income entries for paychecks, freelance income, gifts, investments, and other income
 - Expense entries in SYP, USD, and EUR
 - Currency exchange rates with effective dates
-- Live exchange-rate sync for SYP, USD, and EUR
+- Date-aware SP Today exchange-rate sync for SYP, USD, and EUR
 - Budget periods with an opening period and automatic monthly periods afterward
 - Monthly budgets per user, budget period, and category
 - Budget usage is calculated against period income so expenses reduce available income
 - Remaining income is shown as a Savings value for period-end planning
 - Expense User and Expense Manager roles
 - Permission filters so normal users only see their own income, expenses, and budgets
-- Client-side exchange-rate fetching and base-currency calculation
+- Client-side exchange-rate fetching, SP Today sync actions, and base-currency calculation
 - Script reports for monthly, category, entry-level, currency exposure, and income-vs-expense summaries
 - Personal Expenses workspace with dashboard widgets, including Remaining Budget in currency value
 - Website dashboard at `/expense-tracker`
@@ -93,19 +93,52 @@ To reload dummy data for a user:
 bench --site your-site-name execute personal_expense_tracker.install.create_dummy_data --kwargs "{'user': 'user@example.com'}"
 ```
 
-## Live Exchange Rates
+## Date-Aware SP Today Exchange Rates
 
-Expense Managers can sync live exchange rates from SP Today:
+Expense Managers can sync SP Today exchange rates by date:
 
-- Open an Expense Entry and click Exchange Rate > Sync SP Today Rates
-- Or open any Currency Exchange Rate and click Sync SP Today Rates
+- For today's date, the app reads the live public SP Today USD and EUR currency pages.
+- For past dates, the app reads the public SP Today historical chart endpoint.
+- Future dates cannot be synced because SP Today cannot provide future exchange rates.
 
-The SP Today sync reads the public USD and EUR pages and stores the selected sell rate by default:
+Live sources:
 
 ```text
 https://sp-today.com/en/currency/us-dollar
 https://sp-today.com/en/currency/euro
 ```
+
+Historical source pattern:
+
+```text
+https://sp-today.com/api/historical?code=USD&city=damascus&range=1m
+```
+
+The selected rate type is `sell` by default. Historical sync stores all supported pairs for the requested date:
+
+- SYP to USD and USD to SYP
+- SYP to EUR and EUR to SYP
+- USD to EUR and EUR to USD
+
+### Currency Exchange Rate Form
+
+Use this form when you want to manage rates directly:
+
+1. Select `From Currency`, `To Currency`, and `Effective Date`.
+2. Enter `Exchange Rate` manually and save, or click `Sync SP Today Rates`.
+3. If a manual rate already exists and SP Today returns a different value, the sync action updates the `exchange_rate`, `source`, and `notes` fields so you can save the corrected value.
+
+The form-level sync only fills the selected currency pair. It does not force a bulk overwrite from the form.
+
+### Expense Entry and Income Entry Forms
+
+Both transaction forms use the same exchange-rate behavior:
+
+- When `currency`, `base_currency`, or `posting_date` changes, the app checks `Currency Exchange Rate` for an exact rate on that date.
+- If the exact rate exists, it is fetched automatically and the `Fetch Exchange Rate` button is shown.
+- If the exact rate does not exist, `Fetch Exchange Rate` is hidden.
+- Expense Managers can click `Sync SP Today Rates` to save SP Today rates for the selected posting date, then the transaction fetches the newly saved rate automatically.
+- If `currency` equals `base_currency`, the exchange rate is set to `1`.
 
 To use buy or midpoint rates instead of sell rates:
 
@@ -117,7 +150,13 @@ bench --site your-site-name clear-cache
 You can also sync SP Today rates from the command line:
 
 ```bash
-bench --site your-site-name execute personal_expense_tracker.api.sync_exchange_rates_from_sp_today
+bench --site your-site-name execute personal_expense_tracker.api.sync_exchange_rates_from_sp_today --kwargs "{'effective_date': '2026-06-07', 'rate_type': 'sell'}"
+```
+
+To fetch a single pair value without saving it:
+
+```bash
+bench --site your-site-name execute personal_expense_tracker.api.get_sp_today_exchange_rate_for_pair --kwargs "{'from_currency': 'USD', 'to_currency': 'SYP', 'effective_date': '2026-06-07', 'rate_type': 'sell'}"
 ```
 
 The generic JSON API sync is still available. To use another compatible API endpoint, set this site config value. The URL may include `{base_currency}`:

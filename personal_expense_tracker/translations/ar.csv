@@ -157,6 +157,32 @@ No active exchange rate found for {0} to {1}.,لا يوجد سعر صرف نشط
 Amount in {0}: {1},المبلغ بـ {0}: {1}
 Syncing SP Today exchange rates...,جارٍ مزامنة أسعار صرف SP Today...
 {0} SP Today exchange rates synced.,تمت مزامنة {0} أسعار صرف من SP Today.
+{0} SP Today exchange rates synced for {1}.,تمت مزامنة {0} أسعار صرف من SP Today لتاريخ {1}.
+Missing Date,التاريخ مفقود
+Please select Posting Date before syncing SP Today rates.,يرجى تحديد تاريخ القيد قبل مزامنة أسعار SP Today.
+Please select Effective Date before syncing SP Today rates.,يرجى تحديد تاريخ السريان قبل مزامنة أسعار SP Today.
+No exchange rate found for {0} to {1} on {2}. Click Sync SP Today Rates to save rates for this date.,لا يوجد سعر صرف من {0} إلى {1} بتاريخ {2}. اضغط على مزامنة أسعار SP Today لحفظ الأسعار لهذا التاريخ.
+No exchange rate found for {0} to {1} on {2}. Click Sync SP Today Rates to save rates for today.,لا يوجد سعر صرف من {0} إلى {1} بتاريخ {2}. اضغط على مزامنة أسعار SP Today لحفظ أسعار اليوم.
+No exchange rate found for {0} to {1} on {2}. Ask an Expense Manager to sync SP Today rates for today.,لا يوجد سعر صرف من {0} إلى {1} بتاريخ {2}. اطلب من مدير المصاريف مزامنة أسعار SP Today لليوم.
+No exchange rate found for {0} to {1} on {2}. Ask an Expense Manager to sync SP Today rates for this date.,لا يوجد سعر صرف من {0} إلى {1} بتاريخ {2}. اطلب من مدير المصاريف مزامنة أسعار SP Today لهذا التاريخ.
+"No exchange rate found for {0} to {1} on {2}. SP Today public sync only provides live rates for today, so enter this historical rate manually in Currency Exchange Rate.",لا يوجد سعر صرف من {0} إلى {1} بتاريخ {2}. مزامنة SP Today العامة توفر الأسعار الحية لليوم فقط، لذلك أدخل هذا السعر التاريخي يدوياً في سعر صرف العملة.
+SP Today Live Rates,أسعار SP Today الحية
+SP Today public pages only provide live rates for today ({0}). Enter the historical exchange rate manually for {1}.,صفحات SP Today العامة توفر الأسعار الحية لليوم فقط ({0}). أدخل سعر الصرف التاريخي يدوياً لتاريخ {1}.
+Missing Currency Pair,زوج العملات مفقود
+Please select From Currency and To Currency before syncing SP Today rates.,يرجى تحديد العملة المصدر والعملة الهدف قبل مزامنة أسعار SP Today.
+Fetching SP Today exchange rate...,جارٍ جلب سعر صرف SP Today...
+SP Today exchange rate fetched for {0} on {1}.,تم جلب سعر صرف SP Today لـ {0} بتاريخ {1}.
+Could not fetch {0}/SYP historical rates from SP Today: {1},تعذر جلب أسعار {0}/SYP التاريخية من SP Today: {1}
+SP Today historical endpoint returned an invalid JSON response.,أرجعت نقطة بيانات SP Today التاريخية استجابة JSON غير صالحة.
+SP Today historical endpoint returned an unexpected response.,أرجعت نقطة بيانات SP Today التاريخية استجابة غير متوقعة.
+SP Today returned an invalid historical {0}/SYP rate.,أرجع SP Today سعراً تاريخياً غير صالح لـ {0}/SYP.
+SP Today does not have a historical {0}/SYP rate for {1}.,لا يحتوي SP Today على سعر تاريخي لـ {0}/SYP بتاريخ {1}.
+SP Today returned an invalid historical exchange rate.,أرجع SP Today سعر صرف تاريخي غير صالح.
+SP Today rates cannot be synced for a future date: {0}.,لا يمكن مزامنة أسعار SP Today لتاريخ مستقبلي: {0}.
+Same-currency exchange rate set to 1.,تم ضبط سعر صرف العملة نفسها على 1.
+Invalid SP Today rate received for {0} or {1}.,تم استلام سعر SP Today غير صالح لـ {0} أو {1}.
+"Fetched from SP Today public historical endpoint on {0} and saved for effective date {1}. Rate type: {2}. USD buy/sell: {3}/{4}. EUR buy/sell: {5}/{6}.",تم جلب الأسعار من نقطة بيانات SP Today التاريخية العامة بتاريخ {0} وحفظها لتاريخ السريان {1}. نوع السعر: {2}. شراء/بيع الدولار: {3}/{4}. شراء/بيع اليورو: {5}/{6}.
+"Fetched from SP Today public currency pages on {0} and saved for effective date {1}. Rate type: {2}. USD buy/sell: {3}/{4}. EUR buy/sell: {5}/{6}.",تم جلب الأسعار من صفحات SP Today العامة بتاريخ {0} وحفظها لتاريخ السريان {1}. نوع السعر: {2}. شراء/بيع الدولار: {3}/{4}. شراء/بيع اليورو: {5}/{6}.
 Remaining Budget: {0} ({1}% used),الميزانية المتبقية: {0} (مستخدم {1}%)
 Only Expense Managers can sync exchange rates.,يمكن لمديري المصاريف فقط مزامنة أسعار الصرف.
 Could not fetch exchange rates from API: {0},تعذر جلب أسعار الصرف من واجهة API: {0}

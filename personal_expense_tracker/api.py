@@ -31,12 +31,72 @@ SP_TODAY_CURRENCY_PAGES = {
 	"USD": "https://sp-today.com/en/currency/us-dollar",
 	"EUR": "https://sp-today.com/en/currency/euro",
 }
+SP_TODAY_HISTORICAL_URL = "https://sp-today.com/api/historical"
+SP_TODAY_HISTORICAL_CITY = "damascus"
 SP_TODAY_RATE_TYPES = ("buy", "sell", "mid")
 
 
 @frappe.whitelist()
 def get_latest_exchange_rate(from_currency, to_currency, posting_date=None):
 	return get_latest_rate_record(from_currency, to_currency, posting_date)
+
+
+@frappe.whitelist()
+def get_exchange_rate_for_date(from_currency, to_currency, posting_date=None):
+	validate_supported_currency(from_currency, _("From Currency"))
+	validate_supported_currency(to_currency, _("To Currency"))
+	posting_date = getdate(posting_date or today())
+
+	if from_currency == to_currency:
+		return frappe._dict(
+			{
+				"exchange_rate": 1,
+				"from_currency": from_currency,
+				"to_currency": to_currency,
+				"effective_date": posting_date,
+				"name": None,
+			}
+		)
+
+	rate = frappe.db.get_all(
+		"Currency Exchange Rate",
+		filters={
+			"from_currency": from_currency,
+			"to_currency": to_currency,
+			"effective_date": posting_date,
+			"is_active": 1,
+		},
+		fields=["name", "from_currency", "to_currency", "exchange_rate", "effective_date"],
+		order_by="modified desc",
+		limit=1,
+	)
+	if rate:
+		return frappe._dict(rate[0])
+
+	inverse_rate = frappe.db.get_all(
+		"Currency Exchange Rate",
+		filters={
+			"from_currency": to_currency,
+			"to_currency": from_currency,
+			"effective_date": posting_date,
+			"is_active": 1,
+		},
+		fields=["name", "from_currency", "to_currency", "exchange_rate", "effective_date"],
+		order_by="modified desc",
+		limit=1,
+	)
+	if inverse_rate and flt(inverse_rate[0].exchange_rate):
+		return frappe._dict(
+			{
+				"name": inverse_rate[0].name,
+				"from_currency": from_currency,
+				"to_currency": to_currency,
+				"exchange_rate": 1 / flt(inverse_rate[0].exchange_rate),
+				"effective_date": inverse_rate[0].effective_date,
+			}
+		)
+
+	return None
 
 
 def get_exchange_rate_api_url(base_currency):
@@ -159,6 +219,100 @@ def fetch_sp_today_currency_rate(currency):
 	return rates
 
 
+def get_sp_today_historical_range(effective_date):
+	days_old = (getdate(today()) - getdate(effective_date)).days
+	if days_old <= 7:
+		return "1w"
+	if days_old <= 31:
+		return "1m"
+	if days_old <= 93:
+		return "3m"
+	if days_old <= 186:
+		return "6m"
+	if days_old <= 366:
+		return "1y"
+	return "all"
+
+
+def get_sp_today_row_date(row):
+	date_value = row.get("date")
+	if not date_value:
+		return None
+
+	return getdate(str(date_value).split("T", 1)[0])
+
+
+def fetch_sp_today_historical_rows(currency, date_range):
+	try:
+		response = requests.get(
+			SP_TODAY_HISTORICAL_URL,
+			params={
+				"code": currency,
+				"city": SP_TODAY_HISTORICAL_CITY,
+				"range": date_range,
+			},
+			timeout=20,
+			headers={"User-Agent": "PersonalExpenseTracker/0.0.1"},
+		)
+		response.raise_for_status()
+	except requests.RequestException as exc:
+		frappe.throw(
+			_("Could not fetch {0}/SYP historical rates from SP Today: {1}").format(
+				currency, str(exc)
+			)
+		)
+
+	try:
+		rows = response.json()
+	except ValueError:
+		frappe.throw(_("SP Today historical endpoint returned an invalid JSON response."))
+
+	if not isinstance(rows, list):
+		frappe.throw(_("SP Today historical endpoint returned an unexpected response."))
+
+	return rows
+
+
+def fetch_sp_today_historical_currency_rate(currency, effective_date):
+	effective_date = getdate(effective_date)
+	date_range = get_sp_today_historical_range(effective_date)
+	rows = fetch_sp_today_historical_rows(currency, date_range)
+
+	if date_range != "all" and not any(get_sp_today_row_date(row) == effective_date for row in rows):
+		# Retry all data when a shorter chart range does not contain the requested date.
+		date_range = "all"
+		rows = fetch_sp_today_historical_rows(currency, date_range)
+
+	for row in rows:
+		if get_sp_today_row_date(row) != effective_date:
+			continue
+
+		rates = frappe._dict(
+			{
+				"buy": flt(row.get("buy")),
+				"sell": flt(row.get("sell")),
+				"recorded_at": row.get("date"),
+				"source_url": get_sp_today_historical_url(currency, date_range),
+			}
+		)
+		if rates.buy <= 0 or rates.sell <= 0:
+			frappe.throw(_("SP Today returned an invalid historical {0}/SYP rate.").format(currency))
+		return rates
+
+	frappe.throw(
+		_("SP Today does not have a historical {0}/SYP rate for {1}.").format(
+			currency, effective_date
+		)
+	)
+
+
+def get_sp_today_historical_url(currency, date_range):
+	return (
+		f"{SP_TODAY_HISTORICAL_URL}?code={currency}&city={SP_TODAY_HISTORICAL_CITY}"
+		f"&range={date_range}"
+	)
+
+
 def select_sp_today_rate(rates, rate_type):
 	if rate_type == "mid":
 		return flt((rates.buy + rates.sell) / 2, 9)
@@ -166,7 +320,7 @@ def select_sp_today_rate(rates, rate_type):
 	return flt(rates.get(rate_type), 9)
 
 
-def fetch_exchange_rates_from_sp_today(rate_type=None):
+def fetch_live_exchange_rates_from_sp_today(rate_type=None):
 	rate_type = get_sp_today_rate_type(rate_type)
 	usd_rates = fetch_sp_today_currency_rate("USD")
 	eur_rates = fetch_sp_today_currency_rate("EUR")
@@ -186,6 +340,7 @@ def fetch_exchange_rates_from_sp_today(rate_type=None):
 			"source": SP_TODAY_RATE_SOURCE,
 			"source_url": ", ".join(SP_TODAY_CURRENCY_PAGES.values()),
 			"provider_timestamp": None,
+			"source_mode": "live",
 			"rate_type": rate_type,
 			"provider_rates": {
 				"USD": {"buy": usd_rates.buy, "sell": usd_rates.sell},
@@ -193,6 +348,94 @@ def fetch_exchange_rates_from_sp_today(rate_type=None):
 			},
 		}
 	)
+
+
+def fetch_historical_exchange_rates_from_sp_today(effective_date, rate_type=None):
+	rate_type = get_sp_today_rate_type(rate_type)
+	effective_date = getdate(effective_date)
+	usd_rates = fetch_sp_today_historical_currency_rate("USD", effective_date)
+	eur_rates = fetch_sp_today_historical_currency_rate("EUR", effective_date)
+
+	usd_to_syp = select_sp_today_rate(usd_rates, rate_type)
+	eur_to_syp = select_sp_today_rate(eur_rates, rate_type)
+	if usd_to_syp <= 0 or eur_to_syp <= 0:
+		frappe.throw(_("SP Today returned an invalid historical exchange rate."))
+
+	return frappe._dict(
+		{
+			"rates": {
+				"SYP": 1,
+				"USD": 1 / usd_to_syp,
+				"EUR": 1 / eur_to_syp,
+			},
+			"source": SP_TODAY_RATE_SOURCE,
+			"source_url": ", ".join([usd_rates.source_url, eur_rates.source_url]),
+			"provider_timestamp": ", ".join([usd_rates.recorded_at, eur_rates.recorded_at]),
+			"source_mode": "historical",
+			"rate_type": rate_type,
+			"provider_rates": {
+				"USD": {"buy": usd_rates.buy, "sell": usd_rates.sell},
+				"EUR": {"buy": eur_rates.buy, "sell": eur_rates.sell},
+			},
+		}
+	)
+
+
+def fetch_exchange_rates_from_sp_today(rate_type=None, effective_date=None):
+	effective_date = getdate(effective_date or today())
+	if effective_date > getdate(today()):
+		frappe.throw(_("SP Today rates cannot be synced for a future date: {0}.").format(effective_date))
+
+	if effective_date == getdate(today()):
+		return fetch_live_exchange_rates_from_sp_today(rate_type=rate_type)
+
+	return fetch_historical_exchange_rates_from_sp_today(
+		effective_date=effective_date,
+		rate_type=rate_type,
+	)
+
+
+@frappe.whitelist()
+def get_sp_today_exchange_rate_for_pair(from_currency, to_currency, effective_date=None, rate_type=None):
+	ensure_can_sync_exchange_rates()
+	validate_supported_currency(from_currency, _("From Currency"))
+	validate_supported_currency(to_currency, _("To Currency"))
+	effective_date = getdate(effective_date or today())
+
+	if from_currency == to_currency:
+		return {
+			"from_currency": from_currency,
+			"to_currency": to_currency,
+			"exchange_rate": 1,
+			"effective_date": effective_date,
+			"source": SP_TODAY_RATE_SOURCE,
+			"notes": _("Same-currency exchange rate set to 1."),
+		}
+
+	api_result = fetch_exchange_rates_from_sp_today(
+		rate_type=rate_type,
+		effective_date=effective_date,
+	)
+	from_rate = flt(api_result.rates[from_currency])
+	to_rate = flt(api_result.rates[to_currency])
+	if from_rate <= 0 or to_rate <= 0:
+		frappe.throw(_("Invalid SP Today rate received for {0} or {1}.").format(from_currency, to_currency))
+
+	exchange_rate = flt(to_rate / from_rate, 9)
+	notes = get_sp_today_sync_notes(api_result, effective_date)
+	return {
+		"from_currency": from_currency,
+		"to_currency": to_currency,
+		"exchange_rate": exchange_rate,
+		"effective_date": effective_date,
+		"source": api_result.source,
+		"source_url": api_result.source_url,
+		"provider_timestamp": api_result.provider_timestamp,
+		"source_mode": api_result.source_mode,
+		"rate_type": api_result.rate_type,
+		"provider_rates": api_result.provider_rates,
+		"notes": notes,
+	}
 
 
 def get_supported_currency_pairs(api_rates):
@@ -273,6 +516,35 @@ def save_exchange_rate_result(api_result, effective_date, notes):
 	return updated_rates
 
 
+def get_sp_today_sync_notes(api_result, effective_date):
+	if api_result.source_mode == "historical":
+		return _(
+			"Fetched from SP Today public historical endpoint on {0} and saved for effective date {1}. Rate type: {2}. "
+			"USD buy/sell: {3}/{4}. EUR buy/sell: {5}/{6}."
+		).format(
+			nowdate(),
+			effective_date,
+			api_result.rate_type,
+			api_result.provider_rates["USD"]["buy"],
+			api_result.provider_rates["USD"]["sell"],
+			api_result.provider_rates["EUR"]["buy"],
+			api_result.provider_rates["EUR"]["sell"],
+		)
+
+	return _(
+		"Fetched from SP Today public currency pages on {0} and saved for effective date {1}. Rate type: {2}. "
+		"USD buy/sell: {3}/{4}. EUR buy/sell: {5}/{6}."
+	).format(
+		nowdate(),
+		effective_date,
+		api_result.rate_type,
+		api_result.provider_rates["USD"]["buy"],
+		api_result.provider_rates["USD"]["sell"],
+		api_result.provider_rates["EUR"]["buy"],
+		api_result.provider_rates["EUR"]["sell"],
+	)
+
+
 @frappe.whitelist()
 def sync_exchange_rates_from_api(base_currency="USD", effective_date=None, provider_url=None):
 	ensure_can_sync_exchange_rates()
@@ -298,24 +570,19 @@ def sync_exchange_rates_from_api(base_currency="USD", effective_date=None, provi
 def sync_exchange_rates_from_sp_today(effective_date=None, rate_type=None):
 	ensure_can_sync_exchange_rates()
 	effective_date = getdate(effective_date or today())
-	api_result = fetch_exchange_rates_from_sp_today(rate_type=rate_type)
-	notes = _(
-		"Synced from SP Today public currency pages on {0}. Rate type: {1}. "
-		"USD buy/sell: {2}/{3}. EUR buy/sell: {4}/{5}."
-	).format(
-		nowdate(),
-		api_result.rate_type,
-		api_result.provider_rates["USD"]["buy"],
-		api_result.provider_rates["USD"]["sell"],
-		api_result.provider_rates["EUR"]["buy"],
-		api_result.provider_rates["EUR"]["sell"],
+	api_result = fetch_exchange_rates_from_sp_today(
+		rate_type=rate_type,
+		effective_date=effective_date,
 	)
+	notes = get_sp_today_sync_notes(api_result, effective_date)
 	updated_rates = save_exchange_rate_result(api_result, effective_date, notes)
 
 	return {
 		"effective_date": effective_date,
 		"source": api_result.source,
 		"source_url": api_result.source_url,
+		"source_mode": api_result.source_mode,
+		"provider_timestamp": api_result.provider_timestamp,
 		"rate_type": api_result.rate_type,
 		"provider_rates": api_result.provider_rates,
 		"updated_rates": updated_rates,
