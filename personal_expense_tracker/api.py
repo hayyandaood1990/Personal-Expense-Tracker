@@ -34,6 +34,8 @@ SP_TODAY_CURRENCY_PAGES = {
 SP_TODAY_HISTORICAL_URL = "https://sp-today.com/api/historical"
 SP_TODAY_HISTORICAL_CITY = "damascus"
 SP_TODAY_RATE_TYPES = ("buy", "sell", "mid")
+BUDGET_WARNING_PERCENT = 75
+BUDGET_DANGER_PERCENT = 90
 
 
 @frappe.whitelist()
@@ -790,8 +792,6 @@ def get_category_expense_chart(from_date=None, to_date=None, user=None):
 def get_monthly_budget_status(
 	user=None, month=None, year=None, category=None, budget_name=None, budget_period=None
 ):
-	user = resolve_user_filter(user)
-
 	if not category:
 		return None
 
@@ -799,61 +799,528 @@ def get_monthly_budget_status(
 		budget = frappe.get_doc("Monthly Budget", budget_name)
 		if not is_expense_manager() and budget.user != frappe.session.user:
 			frappe.throw(_("You are not permitted to view this budget."))
+
+		return get_category_budget_status(
+			user=budget.user,
+			category=budget.category,
+			budget_period=budget.budget_period,
+			budget_name=budget.name,
+		)
+
+	user = resolve_budget_user(user)
+	if not user:
+		user = frappe.session.user
+
+	period = None
+	if budget_period:
+		period = get_budget_period_context(budget_period=budget_period)
 	else:
-		period = None
-		if budget_period:
-			period = frappe.db.get_value(
-				"Budget Period",
-				budget_period,
-				["name", "month", "year"],
-				as_dict=True,
-			)
-		period = frappe._dict(period) if period else get_budget_period_for_date(create_if_missing=True)
+		period = get_budget_period_for_date(create_if_missing=True)
+
+	if not period:
+		return None
+
+	budget_name = frappe.db.get_value(
+		"Monthly Budget",
+		{"user": user, "budget_period": period.name, "category": category},
+		"name",
+	)
+	if not budget_name:
+		month = month or period.month
+		year = cint(year) or period.year
 		budget_name = frappe.db.get_value(
 			"Monthly Budget",
-			{"user": user, "budget_period": period.name, "category": category},
+			{"user": user, "month": month, "year": year, "category": category},
 			"name",
 		)
-		if not budget_name:
-			month = month or period.month
-			year = cint(year) or period.year
-			budget_name = frappe.db.get_value(
-				"Monthly Budget",
-				{"user": user, "month": month, "year": year, "category": category},
-				"name",
-			)
-		if not budget_name:
-			return None
-		budget = frappe.get_doc("Monthly Budget", budget_name)
+	if not budget_name:
+		return get_category_budget_status(user=user, category=category, budget_period=period.name)
 
-	if budget.budget_period:
-		from_date, to_date = get_budget_period_date_range(budget.budget_period)
-	else:
-		from_date, to_date = get_month_date_range(budget.month, budget.year)
-	rows = get_expense_rows(
-		user=budget.user,
-		from_date=from_date,
-		to_date=to_date,
-		category=budget.category,
+	return get_category_budget_status(
+		user=user,
+		category=category,
+		budget_period=period.name,
+		budget_name=budget_name,
 	)
-	spent = get_total_in_currency(rows, BASE_CURRENCY)
-	income_rows = get_income_rows(user=budget.user, from_date=from_date, to_date=to_date)
+
+
+def resolve_budget_user(user=None, allow_all_users=False):
+	if is_expense_manager():
+		return user or (None if allow_all_users else frappe.session.user)
+
+	return frappe.session.user
+
+
+def get_budget_period_context(budget_period=None, posting_date=None, create_if_missing=True):
+	if budget_period:
+		period = frappe.db.get_value(
+			"Budget Period",
+			budget_period,
+			["name", "period_name", "from_date", "to_date", "month", "year", "status"],
+			as_dict=True,
+		)
+		if not period:
+			frappe.throw(_("Budget Period {0} does not exist.").format(budget_period))
+		return frappe._dict(period)
+
+	period = get_budget_period_for_date(
+		period_date=posting_date,
+		create_if_missing=create_if_missing,
+	)
+	return frappe._dict(period) if period else None
+
+
+def get_category_default_budget(category):
+	if not category:
+		return 0
+
+	return flt(frappe.db.get_value("Expense Category", category, "monthly_budget"))
+
+
+def get_budget_status_code(budget_amount, spent):
+	budget_amount = flt(budget_amount)
+	spent = flt(spent)
+	if budget_amount <= 0:
+		return "no_budget"
+
+	usage_percent = flt(spent / budget_amount * 100, 2)
+	if spent > budget_amount:
+		return "exceeded"
+	if usage_percent >= BUDGET_DANGER_PERCENT:
+		return "danger"
+	if usage_percent >= BUDGET_WARNING_PERCENT:
+		return "warning"
+	return "safe"
+
+
+def get_budget_status_label(status):
+	labels = {
+		"safe": _("Safe"),
+		"warning": _("Watch"),
+		"danger": _("Near Limit"),
+		"exceeded": _("Exceeded"),
+		"no_budget": _("No Budget"),
+	}
+	return labels.get(status, status)
+
+
+def get_budget_source_label(source):
+	labels = {
+		"monthly_budget": _("Monthly Budget"),
+		"default_category_budget": _("Default category budget"),
+		"none": _("No active budget"),
+	}
+	return labels.get(source, source)
+
+
+def get_category_period_spend(user, category, from_date, to_date, exclude_expense_entry=None):
+	filters = {
+		"category": category,
+		"posting_date": ["between", [from_date, to_date]],
+	}
+	if user:
+		filters["user"] = user
+
+	if exclude_expense_entry:
+		filters["name"] = ["!=", exclude_expense_entry]
+
+	rows = frappe.get_all(
+		"Expense Entry",
+		filters=filters,
+		fields=["posting_date", "amount_in_base_currency", "base_currency"],
+	)
+	total = 0
+	for row in rows:
+		total += convert_amount(
+			row.amount_in_base_currency,
+			row.base_currency or BASE_CURRENCY,
+			BASE_CURRENCY,
+			row.posting_date,
+		)
+	return flt(total, 2)
+
+
+def get_current_expense_contribution(current_expense, user, category, from_date, to_date):
+	if not current_expense:
+		return 0
+	if current_expense.user != user or current_expense.category != category:
+		return 0
+	if not current_expense.posting_date:
+		return 0
+
+	posting_date = getdate(current_expense.posting_date)
+	if not (getdate(from_date) <= posting_date <= getdate(to_date)):
+		return 0
+
+	return flt(
+		convert_amount(
+			current_expense.amount_in_base_currency,
+			current_expense.base_currency or BASE_CURRENCY,
+			BASE_CURRENCY,
+			posting_date,
+		),
+		2,
+	)
+
+
+def get_category_budget_message(status):
+	if status.status == "no_budget":
+		if status.default_budget:
+			return _(
+				"No active budget exists for {0} in {1}. Default category budget: {2}."
+			).format(status.category, status.period_label, status.default_budget_display)
+		return _("No active budget exists for {0} in {1}.").format(
+			status.category, status.period_label
+		)
+
+	if status.status == "exceeded":
+		return _(
+			"Warning: You exceeded the budget for this category by {0}. You used {1}% of the allocated budget."
+		).format(status.overrun_display, status.usage_percent)
+
+	return _("You have {0} remaining for this category budget. {1}% used.").format(
+		status.remaining_display,
+		status.usage_percent,
+	)
+
+
+def get_category_budget_insight(status):
+	if status.status == "no_budget":
+		if status.spent:
+			return _("This category has spending in the period but no active Monthly Budget.")
+		return _("Create a Monthly Budget when you want this category tracked actively.")
+	if status.status == "exceeded":
+		return _("Reduce future spending or increase this category budget for the period.")
+	if status.status == "danger":
+		return _("This category is close to its allocated budget.")
+	if status.status == "warning":
+		return _("Spending is healthy, but this category deserves attention.")
+	return _("This category is inside its planned budget.")
+
+
+@frappe.whitelist()
+def get_category_budget_status(
+	user=None,
+	category=None,
+	posting_date=None,
+	budget_period=None,
+	budget_name=None,
+	current_expense=None,
+):
+	if not category and not budget_name:
+		return None
+
+	budget = None
+	if budget_name and frappe.db.exists("Monthly Budget", budget_name):
+		budget = frappe.db.get_value(
+			"Monthly Budget",
+			budget_name,
+			[
+				"name",
+				"user",
+				"category",
+				"budget_period",
+				"budget_amount",
+				"currency",
+				"budget_in_base_currency",
+			],
+			as_dict=True,
+		)
+		user = budget.user
+		category = budget.category
+		budget_period = budget.budget_period
+
+	user = resolve_budget_user(user)
+	if not user:
+		user = frappe.session.user
+
+	period = get_budget_period_context(
+		budget_period=budget_period,
+		posting_date=posting_date,
+		create_if_missing=True,
+	)
+	if not period:
+		return None
+
+	if not budget:
+		budget = frappe.db.get_value(
+			"Monthly Budget",
+			{"user": user, "budget_period": period.name, "category": category},
+			[
+				"name",
+				"user",
+				"category",
+				"budget_period",
+				"budget_amount",
+				"currency",
+				"budget_in_base_currency",
+			],
+			as_dict=True,
+		)
+
+	exclude_name = None
+	if current_expense and getattr(current_expense, "name", None) and not current_expense.is_new():
+		exclude_name = current_expense.name
+
+	spent = get_category_period_spend(user, category, period.from_date, period.to_date, exclude_name)
+	spent += get_current_expense_contribution(
+		current_expense,
+		user,
+		category,
+		period.from_date,
+		period.to_date,
+	)
+	spent = flt(spent, 2)
+	total_expenses = get_total_in_currency(
+		get_expense_rows(user=user, from_date=period.from_date, to_date=period.to_date),
+		BASE_CURRENCY,
+	)
+	total_income = get_total_income_in_currency(
+		get_income_rows(user=user, from_date=period.from_date, to_date=period.to_date),
+		BASE_CURRENCY,
+	)
+	income_remaining = flt(total_income - total_expenses, 2)
+	income_usage_percent = flt(total_expenses / total_income * 100, 2) if total_income else 0
+
+	default_budget = get_category_default_budget(category)
+	budget_amount = flt(budget.budget_in_base_currency) if budget else 0
+	usage_percent = flt(spent / budget_amount * 100, 2) if budget_amount else 0
+	remaining = flt(budget_amount - spent, 2) if budget_amount else 0
+	overrun = flt(max(spent - budget_amount, 0), 2) if budget_amount else 0
+	status_code = get_budget_status_code(budget_amount, spent)
+	budget_source = "monthly_budget" if budget else ("default_category_budget" if default_budget else "none")
+
+	status = frappe._dict(
+		{
+			"status": status_code,
+			"status_label": get_budget_status_label(status_code),
+			"category": category,
+			"category_label": _(category or ""),
+			"period": period.name,
+			"period_label": period.get("period_name") or period.name,
+			"from_date": period.from_date,
+			"to_date": period.to_date,
+			"user": user,
+			"budget_name": budget.name if budget else None,
+			"budget_source": budget_source,
+			"budget_source_label": get_budget_source_label(budget_source),
+			"budget": budget_amount,
+			"budget_display": fmt_money(budget_amount, currency=BASE_CURRENCY),
+			"default_budget": default_budget,
+			"default_budget_display": fmt_money(default_budget, currency=BASE_CURRENCY),
+			"spent": spent,
+			"spent_display": fmt_money(spent, currency=BASE_CURRENCY),
+			"remaining": remaining,
+			"remaining_display": fmt_money(remaining, currency=BASE_CURRENCY),
+			"overrun": overrun,
+			"overrun_display": fmt_money(overrun, currency=BASE_CURRENCY),
+			"usage_percent": usage_percent,
+			"usage_width": min(usage_percent, 100),
+			"total_income": total_income,
+			"total_expenses": total_expenses,
+			"income_remaining": income_remaining,
+			"income_remaining_display": fmt_money(income_remaining, currency=BASE_CURRENCY),
+			"income_usage_percent": income_usage_percent,
+			"currency": BASE_CURRENCY,
+		}
+	)
+	status["message"] = get_category_budget_message(status)
+	status["insight"] = get_category_budget_insight(status)
+	return status
+
+
+@frappe.whitelist()
+def get_category_budget_dashboard(budget_period=None, user=None):
+	resolved_user = resolve_budget_user(user, allow_all_users=True)
+	period = get_budget_period_context(budget_period=budget_period, create_if_missing=True)
+	if not period:
+		return {}
+
+	budget_filters = {"budget_period": period.name}
+	if resolved_user:
+		budget_filters["user"] = resolved_user
+
+	budget_rows = frappe.get_all(
+		"Monthly Budget",
+		filters=budget_filters,
+		fields=["name", "user", "category", "budget_in_base_currency", "budget_amount", "currency"],
+		order_by="category asc",
+	)
+
+	budget_map = defaultdict(lambda: {"amount": 0.0, "count": 0, "names": []})
+	for row in budget_rows:
+		budget_map[row.category]["amount"] += flt(row.budget_in_base_currency)
+		budget_map[row.category]["count"] += 1
+		budget_map[row.category]["names"].append(row.name)
+
+	expense_rows = get_expense_rows(
+		user=resolved_user,
+		from_date=period.from_date,
+		to_date=period.to_date,
+	)
+	income_rows = get_income_rows(
+		user=resolved_user,
+		from_date=period.from_date,
+		to_date=period.to_date,
+	)
+	total_expenses = get_total_in_currency(expense_rows, BASE_CURRENCY)
 	total_income = get_total_income_in_currency(income_rows, BASE_CURRENCY)
-	budget_amount = flt(budget.budget_in_base_currency)
-	remaining = budget_amount - spent
-	usage_percent = (spent / budget_amount * 100) if budget_amount else 0
-	income_remaining = total_income - spent
-	income_usage_percent = (spent / total_income * 100) if total_income else 0
+	income_remaining = flt(total_income - total_expenses, 2)
+	income_usage_percent = flt(total_expenses / total_income * 100, 2) if total_income else 0
+	expense_map = defaultdict(lambda: {"spent": 0.0, "count": 0, "last_date": None})
+	for row in expense_rows:
+		category = row.get("category")
+		amount = convert_amount(
+			row.get("amount_in_base_currency"),
+			row.get("base_currency") or BASE_CURRENCY,
+			BASE_CURRENCY,
+			row.get("posting_date"),
+		)
+		expense_map[category]["spent"] += flt(amount)
+		expense_map[category]["count"] += 1
+		posting_date = getdate(row.get("posting_date"))
+		if not expense_map[category]["last_date"] or posting_date > expense_map[category]["last_date"]:
+			expense_map[category]["last_date"] = posting_date
+
+	active_categories = frappe.get_all(
+		"Expense Category",
+		filters={"is_active": 1},
+		fields=["name", "category_name", "monthly_budget"],
+		order_by="category_name asc",
+	)
+	category_defaults = {row.name: flt(row.monthly_budget) for row in active_categories}
+	categories = set(category_defaults) | set(budget_map) | set(expense_map)
+
+	category_rows = []
+	total_allocated = 0
+	total_spent_budgeted = 0
+	total_unbudgeted = 0
+	for category in sorted(categories, key=lambda value: _(value or "")):
+		budget_amount = flt(budget_map[category]["amount"], 2)
+		spent = flt(expense_map[category]["spent"], 2)
+		count = cint(expense_map[category]["count"])
+		usage_percent = flt(spent / budget_amount * 100, 2) if budget_amount else 0
+		remaining = flt(budget_amount - spent, 2) if budget_amount else 0
+		overrun = flt(max(spent - budget_amount, 0), 2) if budget_amount else 0
+		status_code = get_budget_status_code(budget_amount, spent)
+		average_expense = flt(spent / count, 2) if count else 0
+		default_budget = flt(category_defaults.get(category))
+		budget_source = "monthly_budget" if budget_amount else (
+			"default_category_budget" if default_budget else "none"
+		)
+
+		if budget_amount:
+			total_allocated += budget_amount
+			total_spent_budgeted += spent
+		else:
+			total_unbudgeted += spent
+
+		status = frappe._dict(
+			{
+				"status": status_code,
+				"spent": spent,
+				"budget": budget_amount,
+				"default_budget": default_budget,
+			}
+		)
+		category_rows.append(
+			{
+				"category": category,
+				"category_label": _(category or ""),
+				"period": period.name,
+				"period_label": period.get("period_name") or period.name,
+				"budget_source": budget_source,
+				"budget_source_label": get_budget_source_label(budget_source),
+				"budget_count": budget_map[category]["count"],
+				"budget": budget_amount,
+				"budget_display": fmt_money(budget_amount, currency=BASE_CURRENCY),
+				"default_budget": default_budget,
+				"default_budget_display": fmt_money(default_budget, currency=BASE_CURRENCY),
+				"spent": spent,
+				"spent_display": fmt_money(spent, currency=BASE_CURRENCY),
+				"remaining": remaining,
+				"remaining_display": fmt_money(remaining, currency=BASE_CURRENCY),
+				"overrun": overrun,
+				"overrun_display": fmt_money(overrun, currency=BASE_CURRENCY),
+				"usage_percent": usage_percent,
+				"usage_width": min(usage_percent, 100),
+				"status": status_code,
+				"status_label": get_budget_status_label(status_code),
+				"last_expense_date": expense_map[category]["last_date"],
+				"expense_count": count,
+				"average_expense": average_expense,
+				"average_expense_display": fmt_money(average_expense, currency=BASE_CURRENCY),
+				"insight": get_category_budget_insight(status),
+			}
+		)
+
+	total_remaining = flt(total_allocated - total_spent_budgeted, 2)
+	budget_usage_percent = flt(total_spent_budgeted / total_allocated * 100, 2) if total_allocated else 0
+	highest_usage = max(
+		(row for row in category_rows if row["budget"]),
+		key=lambda row: row["usage_percent"],
+		default=None,
+	)
+
+	available_periods = frappe.get_all(
+		"Budget Period",
+		fields=["name", "period_name", "from_date", "to_date", "status"],
+		order_by="from_date desc",
+		limit=36,
+	)
 
 	return {
-		"budget": budget_amount,
-		"spent": spent,
-		"remaining": remaining,
-		"usage_percent": usage_percent,
-		"total_income": total_income,
-		"income_remaining": income_remaining,
-		"income_usage_percent": income_usage_percent,
+		"period": {
+			"name": period.name,
+			"label": period.get("period_name") or period.name,
+			"from_date": period.from_date,
+			"to_date": period.to_date,
+		},
 		"currency": BASE_CURRENCY,
+		"user": resolved_user,
+		"summary": {
+			"total_income": flt(total_income, 2),
+			"total_income_display": fmt_money(total_income, currency=BASE_CURRENCY),
+			"total_expenses": flt(total_expenses, 2),
+			"total_expenses_display": fmt_money(total_expenses, currency=BASE_CURRENCY),
+			"income_remaining": income_remaining,
+			"income_remaining_display": fmt_money(income_remaining, currency=BASE_CURRENCY),
+			"income_usage_percent": income_usage_percent,
+			"total_allocated": flt(total_allocated, 2),
+			"total_allocated_display": fmt_money(total_allocated, currency=BASE_CURRENCY),
+			"total_spent": flt(total_spent_budgeted, 2),
+			"total_spent_display": fmt_money(total_spent_budgeted, currency=BASE_CURRENCY),
+			"total_remaining": total_remaining,
+			"total_remaining_display": fmt_money(total_remaining, currency=BASE_CURRENCY),
+			"total_unbudgeted": flt(total_unbudgeted, 2),
+			"total_unbudgeted_display": fmt_money(total_unbudgeted, currency=BASE_CURRENCY),
+			"budget_usage_percent": budget_usage_percent,
+			"exceeded_count": len([row for row in category_rows if row["status"] == "exceeded"]),
+			"near_limit_count": len(
+				[row for row in category_rows if row["status"] in {"warning", "danger"}]
+			),
+			"no_budget_count": len([row for row in category_rows if row["status"] == "no_budget"]),
+			"highest_usage_category": highest_usage,
+		},
+		"categories": category_rows,
+		"available_periods": [
+			{
+				"name": row.name,
+				"label": row.period_name or row.name,
+				"from_date": row.from_date,
+				"to_date": row.to_date,
+				"status": row.status,
+			}
+			for row in available_periods
+		],
+		"status_options": [
+			{"value": "", "label": _("All Statuses")},
+			{"value": "safe", "label": get_budget_status_label("safe")},
+			{"value": "warning", "label": get_budget_status_label("warning")},
+			{"value": "danger", "label": get_budget_status_label("danger")},
+			{"value": "exceeded", "label": get_budget_status_label("exceeded")},
+			{"value": "no_budget", "label": get_budget_status_label("no_budget")},
+		],
 	}
 
 
@@ -897,25 +1364,38 @@ def get_top_category_card(filters=None):
 @frappe.whitelist()
 def get_budget_usage_card(filters=None):
 	user = None if is_expense_manager() else frappe.session.user
-	from_date, to_date = get_current_card_period(user)
-	rows = get_expense_rows(user=user, from_date=from_date, to_date=to_date)
-	income_rows = get_income_rows(user=user, from_date=from_date, to_date=to_date)
-	spent = get_total_in_currency(rows, BASE_CURRENCY)
-	total_income = get_total_income_in_currency(income_rows, BASE_CURRENCY)
-	usage = (spent / total_income * 100) if total_income else 0
+	dashboard = get_category_budget_dashboard(user=user)
+	usage = dashboard.get("summary", {}).get("budget_usage_percent", 0)
+	return {"value": flt(usage, 3), "fieldtype": "Percent"}
+
+
+@frappe.whitelist()
+def get_income_used_card(filters=None):
+	user = None if is_expense_manager() else frappe.session.user
+	dashboard = get_category_budget_dashboard(user=user)
+	usage = dashboard.get("summary", {}).get("income_usage_percent", 0)
 	return {"value": flt(usage, 3), "fieldtype": "Percent"}
 
 
 @frappe.whitelist()
 def get_remaining_budget_card(filters=None):
 	user = None if is_expense_manager() else frappe.session.user
-	from_date, to_date = get_current_card_period(user)
-	expense_rows = get_expense_rows(user=user, from_date=from_date, to_date=to_date)
-	income_rows = get_income_rows(user=user, from_date=from_date, to_date=to_date)
-	spent = get_total_in_currency(expense_rows, BASE_CURRENCY)
-	total_income = get_total_income_in_currency(income_rows, BASE_CURRENCY)
+	dashboard = get_category_budget_dashboard(user=user)
+	remaining = dashboard.get("summary", {}).get("total_remaining", 0)
 	return {
-		"value": flt(total_income - spent, 2),
+		"value": flt(remaining, 2),
+		"fieldtype": "Currency",
+		"options": BASE_CURRENCY,
+	}
+
+
+@frappe.whitelist()
+def get_income_left_card(filters=None):
+	user = None if is_expense_manager() else frappe.session.user
+	dashboard = get_category_budget_dashboard(user=user)
+	remaining = dashboard.get("summary", {}).get("income_remaining", 0)
+	return {
+		"value": flt(remaining, 2),
 		"fieldtype": "Currency",
 		"options": BASE_CURRENCY,
 	}

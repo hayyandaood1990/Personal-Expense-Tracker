@@ -6,6 +6,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, getdate, today
 
+from personal_expense_tracker.api import get_category_budget_status
 from personal_expense_tracker.utils import SUPPORTED_CURRENCIES, is_expense_manager
 
 
@@ -26,6 +27,7 @@ class ExpenseEntry(Document):
 		self.validate_posting_date()
 		self.validate_user_access()
 		self.calculate_amount_in_base_currency()
+		self.warn_if_category_budget_exceeded()
 
 	def validate_amount(self):
 		if flt(self.amount) <= 0:
@@ -58,3 +60,33 @@ class ExpenseEntry(Document):
 
 	def calculate_amount_in_base_currency(self):
 		self.amount_in_base_currency = flt(self.amount) * flt(self.exchange_rate_to_base)
+
+	def warn_if_category_budget_exceeded(self):
+		if not self.user or not self.category or not self.posting_date:
+			return
+
+		status = get_category_budget_status(
+			user=self.user,
+			category=self.category,
+			posting_date=self.posting_date,
+			current_expense=self,
+		)
+		if not status or status.get("status") != "exceeded":
+			return
+
+		frappe.msgprint(
+			"<br>".join(
+				[
+					_("Warning: this expense causes you to exceed the budget for {0} by {1}.").format(
+						frappe.bold(status.category_label),
+						frappe.bold(status.overrun_display),
+					),
+					_("Period: {0}").format(frappe.bold(status.period_label)),
+					_("Allocated Budget: {0}").format(frappe.bold(status.budget_display)),
+					_("Current Total Spending: {0}").format(frappe.bold(status.spent_display)),
+					_("Budget Usage: {0}%").format(frappe.bold(status.usage_percent)),
+				]
+			),
+			title=_("Category Budget Exceeded"),
+			indicator="orange",
+		)

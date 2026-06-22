@@ -258,3 +258,68 @@ Category {0} budget can only start from {1}.,يمكن أن تبدأ ميزاني
 Category {0} budget can only be used until {1}.,يمكن استخدام ميزانية الفئة {0} فقط حتى {1}.
 Remaining Budget: {0} ({1}% used). Income left after expenses: {2},الميزانية المتبقية: {0} (مستخدم {1}%). الدخل المتبقي بعد المصاريف: {2}
 "Total monthly budgets ({0}) cannot be greater than total monthly income ({1}) for {2} {3}.",لا يمكن أن يكون إجمالي الميزانيات الشهرية ({0}) أكبر من إجمالي الدخل الشهري ({1}) لـ {2} {3}.
+Dashboard views,طرق عرض اللوحة
+Overview,نظرة عامة
+Category Budgets,ميزانيات الفئات
+left in allocated budgets,متبقٍ في الميزانيات المخصصة
+Income Left,الدخل المتبقي
+Income Used,الدخل المستخدم
+Income Used %,نسبة الدخل المستخدم
+Income used,الدخل المستخدم
+Income left,الدخل المتبقي
+income left,الدخل المتبقي
+Total income,إجمالي الدخل
+Budgeted spent,المصروف من الميزانيات
+Category budget dashboard,لوحة ميزانيات الفئات
+Budget Control,التحكم بالميزانية
+"Category budgets are calculated from Monthly Budget records. Category defaults are shown only as defaults when no active budget exists.",يتم حساب ميزانيات الفئات من سجلات الميزانية الشهرية. تظهر الميزانيات الافتراضية للفئات كقيم افتراضية فقط عند عدم وجود ميزانية نشطة.
+Category budget summary,ملخص ميزانية الفئات
+Category budget filters,فلاتر ميزانية الفئات
+Sort,ترتيب
+Search,بحث
+Search category or insight,ابحث عن فئة أو ملاحظة تحليلية
+All Statuses,كل الحالات
+All Categories,كل الفئات
+Category name,اسم الفئة
+Highest usage,أعلى استخدام
+Lowest remaining,أقل متبقٍ
+Highest overrun,أعلى تجاوز
+Total allocated,إجمالي المخصص
+Total spent,إجمالي المصروف
+Total remaining,إجمالي المتبقي
+Exceeded,متجاوز
+Overrun,التجاوز
+Allocated,المخصص
+Usage,الاستخدام
+Average,المتوسط
+Last expense,آخر مصروف
+Loading category budgets...,جارٍ تحميل ميزانيات الفئات...
+No category budgets match these filters.,لا توجد ميزانيات فئات تطابق هذه الفلاتر.
+Could not load category budgets.,تعذر تحميل ميزانيات الفئات.
+Safe,آمن
+Watch,راقب
+Near Limit,قريب من الحد
+No Budget,لا توجد ميزانية
+Default category budget,ميزانية الفئة الافتراضية
+No active budget,لا توجد ميزانية نشطة
+No active budget exists for {0} in {1}.,لا توجد ميزانية نشطة للفئة {0} في {1}.
+No active budget exists for {0} in {1}. Default category budget: {2}.,لا توجد ميزانية نشطة للفئة {0} في {1}. ميزانية الفئة الافتراضية: {2}.
+"Warning: You exceeded the budget for this category by {0}. You used {1}% of the allocated budget.",تحذير: لقد تجاوزت ميزانية هذه الفئة بمقدار {0}. استخدمت {1}% من الميزانية المخصصة.
+You have {0} remaining for this category budget. {1}% used.,لديك {0} متبقٍ في ميزانية هذه الفئة. تم استخدام {1}%.
+This category has spending in the period but no active Monthly Budget.,هذه الفئة لديها مصاريف ضمن الفترة ولكن لا توجد لها ميزانية شهرية نشطة.
+Create a Monthly Budget when you want this category tracked actively.,أنشئ ميزانية شهرية عندما تريد تتبع هذه الفئة بشكل نشط.
+Reduce future spending or increase this category budget for the period.,خفّض المصاريف القادمة أو زد ميزانية هذه الفئة للفترة.
+This category is close to its allocated budget.,هذه الفئة قريبة من ميزانيتها المخصصة.
+Spending is healthy, but this category deserves attention.,الصرف جيد حالياً، لكن هذه الفئة تحتاج إلى انتباه.
+This category is inside its planned budget.,هذه الفئة ضمن ميزانيتها المخططة.
+Category Budget Exceeded,تم تجاوز ميزانية الفئة
+Warning: this expense causes you to exceed the budget for {0} by {1}.,تحذير: هذا المصروف يجعلك تتجاوز ميزانية {0} بمقدار {1}.
+Period: {0},الفترة: {0}
+Allocated Budget: {0},الميزانية المخصصة: {0}
+Current Total Spending: {0},إجمالي الصرف الحالي: {0}
+Budget Usage: {0}%,استخدام الميزانية: {0}%
+Income left after all expenses: {0},الدخل المتبقي بعد كل المصاريف: {0}
+Category Budget Dashboard,لوحة ميزانية الفئات
+Open Website Dashboard,فتح لوحة الموقع
+Monthly Budget records drive active budget usage. Expense Category monthly budgets are shown only as defaults when no active Monthly Budget exists.,تعتمد نسب استخدام الميزانية الفعلية على سجلات الميزانية الشهرية. تظهر ميزانيات فئات المصاريف الشهرية كقيم افتراضية فقط عند عدم وجود ميزانية شهرية نشطة.
+Unbudgeted Spending,الصرف غير المدرج في ميزانية

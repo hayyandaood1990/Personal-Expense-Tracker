@@ -6,7 +6,11 @@ import frappe
 from frappe import _
 from frappe.utils import flt, fmt_money, getdate, today
 
-from personal_expense_tracker.api import get_expense_rows, get_income_rows
+from personal_expense_tracker.api import (
+	get_category_budget_dashboard,
+	get_expense_rows,
+	get_income_rows,
+)
 from personal_expense_tracker.budget_period import get_budget_period_for_date
 from personal_expense_tracker.utils import (
 	BASE_CURRENCY,
@@ -90,6 +94,7 @@ def build_page_data(
 	currency_totals = get_currency_totals(current_month_rows)
 	monthly_totals = get_monthly_totals(year_rows)
 	budget_status = get_budget_status(user, period, current_month_rows, current_month_income_rows)
+	category_budget_dashboard = get_category_budget_dashboard(budget_period=period.name, user=user)
 	top_category = get_top_category(category_totals)
 	recent_expenses = get_recent_expenses(user)
 
@@ -108,6 +113,7 @@ def build_page_data(
 		"entry_count": len(current_month_rows),
 		"top_category": top_category,
 		"budget": budget_status,
+		"category_budget_dashboard": category_budget_dashboard,
 		"monthly": {
 			"labels": list(MONTHS),
 			"values": monthly_totals,
@@ -214,12 +220,18 @@ def get_budget_status(user, period, rows, income_rows):
 		filters=budget_filters,
 		fields=["name", "user", "category", "budget_in_base_currency"],
 	)
+	budgeted_categories = {row.get("category") for row in budgets}
 	total_budget = sum(flt(row.get("budget_in_base_currency")) for row in budgets)
 	spent = get_rows_total(rows)
+	budgeted_spent = get_rows_total([row for row in rows if row.get("category") in budgeted_categories])
+	unbudgeted_spent = get_rows_total(
+		[row for row in rows if row.get("category") not in budgeted_categories]
+	)
 	total_income = get_income_total(income_rows)
-	remaining_budget = total_budget - spent
+	remaining_budget = total_budget - budgeted_spent
 	income_remaining = total_income - spent
-	usage_percent = (spent / total_income * 100) if total_income else 0
+	usage_percent = (budgeted_spent / total_budget * 100) if total_budget else 0
+	income_usage_percent = (spent / total_income * 100) if total_income else 0
 	allocation_percent = (total_budget / total_income * 100) if total_income else 0
 
 	return {
@@ -229,12 +241,17 @@ def get_budget_status(user, period, rows, income_rows):
 		"income_display": fmt_money(total_income, currency=BASE_CURRENCY),
 		"spent": spent,
 		"spent_display": fmt_money(spent, currency=BASE_CURRENCY),
+		"budgeted_spent": budgeted_spent,
+		"budgeted_spent_display": fmt_money(budgeted_spent, currency=BASE_CURRENCY),
+		"unbudgeted_spent": unbudgeted_spent,
+		"unbudgeted_spent_display": fmt_money(unbudgeted_spent, currency=BASE_CURRENCY),
 		"remaining": flt(remaining_budget, 2),
 		"remaining_display": fmt_money(remaining_budget, currency=BASE_CURRENCY),
 		"income_remaining": flt(income_remaining, 2),
 		"income_remaining_display": fmt_money(income_remaining, currency=BASE_CURRENCY),
 		"usage_percent": flt(usage_percent, 2),
 		"usage_width": min(flt(usage_percent, 2), 100),
+		"income_usage_percent": flt(income_usage_percent, 2),
 		"allocation_percent": flt(allocation_percent, 2),
 		"count": len(budgets),
 	}
@@ -291,4 +308,24 @@ def get_client_translations():
 		"no_categories_yet": _("No categories yet."),
 		"no_currency_exposure_yet": _("No currency exposure yet."),
 		"entries": _("entries"),
+		"all_categories": _("All Categories"),
+		"all_statuses": _("All Statuses"),
+		"category_name": _("Category name"),
+		"highest_usage": _("Highest usage"),
+		"lowest_remaining": _("Lowest remaining"),
+		"highest_overrun": _("Highest overrun"),
+		"total_allocated": _("Total allocated"),
+		"total_spent": _("Total spent"),
+		"total_remaining": _("Total remaining"),
+		"exceeded": _("Exceeded"),
+		"overrun": _("Overrun"),
+		"allocated": _("Allocated"),
+		"spent": _("Spent"),
+		"remaining": _("Remaining"),
+		"usage": _("Usage"),
+		"average": _("Average"),
+		"last_expense": _("Last expense"),
+		"loading_category_budgets": _("Loading category budgets..."),
+		"no_category_budgets_match": _("No category budgets match these filters."),
+		"could_not_load_category_budgets": _("Could not load category budgets."),
 	}

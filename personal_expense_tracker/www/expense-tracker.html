@@ -25,6 +25,12 @@
 			</div>
 		</header>
 
+		<nav class="pet-tabs" aria-label="{{ _('Dashboard views') }}">
+			<button type="button" class="pet-tab is-active" data-pet-tab="overview">{{ _("Overview") }}</button>
+			<button type="button" class="pet-tab" data-pet-tab="category-budgets">{{ _("Category Budgets") }}</button>
+		</nav>
+
+		<section class="pet-tab-panel is-active" data-pet-panel="overview">
 		<section class="pet-metrics" aria-label="{{ _('Expense overview') }}">
 			<article class="pet-card pet-metric pet-accent-blue">
 				<span>{{ _("This Month") }}</span>
@@ -36,6 +42,11 @@
 				<strong>{{ page_data.month_income_display }}</strong>
 				<small>{{ page_data.net_income_display }} {{ _("left after expenses") }}</small>
 			</article>
+			<article class="pet-card pet-metric pet-accent-cyan">
+				<span>{{ _("Income Used") }}</span>
+				<strong>{{ page_data.budget.income_usage_percent }}%</strong>
+				<small>{{ page_data.budget.income_remaining_display }} {{ _("income left") }}</small>
+			</article>
 			<article class="pet-card pet-metric pet-accent-pink">
 				<span>{{ _("Top Category") }}</span>
 				<strong>{{ page_data.top_category.label }}</strong>
@@ -44,7 +55,7 @@
 			<article class="pet-card pet-metric pet-accent-gold">
 				<span>{{ _("Budget Usage") }}</span>
 				<strong>{{ page_data.budget.usage_percent }}%</strong>
-				<small>{{ page_data.budget.income_remaining_display }} {{ _("left after expenses") }}</small>
+				<small>{{ page_data.budget.remaining_display }} {{ _("left in allocated budgets") }}</small>
 			</article>
 		</section>
 
@@ -93,7 +104,7 @@
 						<span>{{ _("Budget") }}</span>
 						<h2>{{ _("Monthly Pulse") }}</h2>
 					</div>
-					<strong>{{ page_data.budget.usage_percent }}%</strong>
+					<strong>{{ page_data.budget.usage_percent }}% {{ _("budget") }}</strong>
 				</div>
 				<div class="pet-progress">
 					<div style="width: {{ page_data.budget.usage_width }}%"></div>
@@ -109,11 +120,19 @@
 					</div>
 					<div>
 						<span>{{ _("Spent") }}</span>
-						<strong>{{ page_data.budget.spent_display }}</strong>
+						<strong>{{ page_data.budget.budgeted_spent_display }}</strong>
 					</div>
 					<div>
 						<span>{{ _("Remaining") }}</span>
 						<strong>{{ page_data.budget.remaining_display }}</strong>
+					</div>
+					<div>
+						<span>{{ _("Income Used") }}</span>
+						<strong>{{ page_data.budget.income_usage_percent }}%</strong>
+					</div>
+					<div>
+						<span>{{ _("Income Left") }}</span>
+						<strong>{{ page_data.budget.income_remaining_display }}</strong>
 					</div>
 				</div>
 			</article>
@@ -143,6 +162,50 @@
 					{% endfor %}
 				</div>
 			</article>
+		</section>
+		</section>
+
+		<section class="pet-tab-panel" data-pet-panel="category-budgets" aria-label="{{ _('Category budget dashboard') }}">
+			<div class="pet-section-heading">
+				<div>
+					<span>{{ _("Budget Control") }}</span>
+					<h2>{{ _("Category Budgets") }}</h2>
+				</div>
+				<p>{{ _("Category budgets are calculated from Monthly Budget records. Category defaults are shown only as defaults when no active budget exists.") }}</p>
+			</div>
+
+			<section id="pet-budget-summary" class="pet-budget-summary" aria-label="{{ _('Category budget summary') }}"></section>
+
+			<section class="pet-budget-tools" aria-label="{{ _('Category budget filters') }}">
+				<label>
+					<span>{{ _("Budget Period") }}</span>
+					<select id="pet-budget-period-filter"></select>
+				</label>
+				<label>
+					<span>{{ _("Category") }}</span>
+					<select id="pet-budget-category-filter"></select>
+				</label>
+				<label>
+					<span>{{ _("Status") }}</span>
+					<select id="pet-budget-status-filter"></select>
+				</label>
+				<label>
+					<span>{{ _("Sort") }}</span>
+					<select id="pet-budget-sort-filter">
+						<option value="usage">{{ _("Highest usage") }}</option>
+						<option value="remaining">{{ _("Lowest remaining") }}</option>
+						<option value="overrun">{{ _("Highest overrun") }}</option>
+						<option value="category">{{ _("Category name") }}</option>
+					</select>
+				</label>
+				<label class="pet-search-field">
+					<span>{{ _("Search") }}</span>
+					<input id="pet-budget-search-filter" type="search" placeholder="{{ _('Search category or insight') }}">
+				</label>
+			</section>
+
+			<div id="pet-budget-state" class="pet-empty-state pet-budget-state">{{ _("Loading category budgets...") }}</div>
+			<section id="pet-category-budget-grid" class="pet-category-budget-grid" aria-live="polite"></section>
 		</section>
 	</section>
 </main>

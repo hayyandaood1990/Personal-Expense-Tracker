@@ -14,8 +14,8 @@
    "label": "Expenses by Currency"
   }
  ],
- "content": "[{\"id\":\"pet-card-this-month\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"This Month Expenses\",\"col\":3}},{\"id\":\"pet-card-today\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today Expenses\",\"col\":3}},{\"id\":\"pet-card-top-category\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Top Category\",\"col\":3}},{\"id\":\"pet-card-budget\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Budget Usage\",\"col\":3}},{\"id\":\"pet-card-remaining-budget\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Remaining Budget\",\"col\":3}},{\"id\":\"pet-chart-monthly\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Expenses\",\"col\":12}},{\"id\":\"pet-chart-category\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Category\",\"col\":6}},{\"id\":\"pet-chart-currency\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Currency\",\"col\":6}},{\"id\":\"pet-header-links\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Expense Tracking</b></span>\",\"col\":12}},{\"id\":\"pet-card-website\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Website Dashboard\",\"col\":3}},{\"id\":\"pet-card-income\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Income Entry\",\"col\":3}},{\"id\":\"pet-card-entry\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Entry\",\"col\":3}},{\"id\":\"pet-card-category\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Category\",\"col\":3}},{\"id\":\"pet-card-budget-link\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Monthly Budget\",\"col\":3}},{\"id\":\"pet-card-period\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Budget Period\",\"col\":3}},{\"id\":\"pet-card-rate\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Currency Exchange Rate\",\"col\":3}}]",
- "creation": "2026-05-14 00:00:00.000000",
+ "content": "[{\"id\":\"pet-card-this-month\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"This Month Expenses\",\"col\":3}},{\"id\":\"pet-card-today\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Today Expenses\",\"col\":3}},{\"id\":\"pet-card-top-category\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Top Category\",\"col\":3}},{\"id\":\"pet-card-budget\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Budget Usage\",\"col\":3}},{\"id\":\"pet-card-remaining-budget\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Remaining Budget\",\"col\":3}},{\"id\":\"pet-card-income-used\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Income Used\",\"col\":3}},{\"id\":\"pet-card-income-left\",\"type\":\"number_card\",\"data\":{\"number_card_name\":\"Income Left\",\"col\":3}},{\"id\":\"pet-chart-monthly\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Monthly Expenses\",\"col\":12}},{\"id\":\"pet-chart-category\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Category\",\"col\":6}},{\"id\":\"pet-chart-currency\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Expenses by Currency\",\"col\":6}},{\"id\":\"pet-header-links\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Expense Tracking</b></span>\",\"col\":12}},{\"id\":\"pet-card-category-budget-dashboard\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Category Budget Dashboard\",\"col\":3}},{\"id\":\"pet-card-website\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Website Dashboard\",\"col\":3}},{\"id\":\"pet-card-income\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Income Entry\",\"col\":3}},{\"id\":\"pet-card-entry\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Entry\",\"col\":3}},{\"id\":\"pet-card-category\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Expense Category\",\"col\":3}},{\"id\":\"pet-card-budget-link\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Monthly Budget\",\"col\":3}},{\"id\":\"pet-card-rate\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Currency Exchange Rate\",\"col\":3}}]",
+ "creation": "2026-05-14 00:00:00",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -27,144 +27,162 @@
  "label": "Personal Expenses",
  "links": [
   {
-   "type": "Card Break",
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Masters",
    "link_count": 2,
-   "hidden": 0,
-   "is_query_report": 0,
-   "onboard": 0
+   "onboard": 0,
+   "type": "Card Break"
   },
   {
-   "type": "Link",
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Expense Category",
-   "link_type": "DocType",
+   "link_count": 0,
    "link_to": "Expense Category",
-   "hidden": 0,
-   "is_query_report": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Currency Exchange Rate",
    "link_type": "DocType",
-   "link_to": "Currency Exchange Rate",
-   "hidden": 0,
-   "is_query_report": 0,
-   "onboard": 0
+   "onboard": 0,
+   "type": "Link"
   },
   {
-   "type": "Card Break",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Currency Exchange Rate",
+   "link_count": 0,
+   "link_to": "Currency Exchange Rate",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Transactions",
    "link_count": 3,
-   "hidden": 0,
-   "is_query_report": 0,
-   "onboard": 0
+   "onboard": 0,
+   "type": "Card Break"
   },
   {
-   "type": "Link",
-   "label": "Income Entry",
-   "link_type": "DocType",
-   "link_to": "Income Entry",
    "hidden": 0,
    "is_query_report": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
    "label": "Expense Entry",
-   "link_type": "DocType",
+   "link_count": 0,
    "link_to": "Expense Entry",
-   "hidden": 0,
-   "is_query_report": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Monthly Budget",
    "link_type": "DocType",
-   "link_to": "Monthly Budget",
-   "hidden": 0,
-   "is_query_report": 0,
-   "onboard": 0
+   "onboard": 0,
+   "type": "Link"
   },
   {
-   "type": "Card Break",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Monthly Budget",
+   "link_count": 0,
+   "link_to": "Monthly Budget",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
    "label": "Reports",
    "link_count": 5,
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Monthly Expense Summary",
+   "link_count": 0,
+   "link_to": "Monthly Expense Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Category Expense Summary",
+   "link_count": 0,
+   "link_to": "Category Expense Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Currency Exposure Report",
+   "link_count": 0,
+   "link_to": "Currency Exposure Report",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Expense Entry Summary",
+   "link_count": 0,
+   "link_to": "Expense Entry Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "hidden": 0,
    "is_query_report": 0,
-   "onboard": 0
+   "label": "Income Entry",
+   "link_count": 0,
+   "link_to": "Income Entry",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   },
   {
-   "type": "Link",
-   "label": "Monthly Expense Summary",
-   "link_type": "Report",
-   "link_to": "Monthly Expense Summary",
-   "is_query_report": 1,
    "hidden": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Category Expense Summary",
-   "link_type": "Report",
-   "link_to": "Category Expense Summary",
    "is_query_report": 1,
-   "hidden": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Expense Entry Summary",
-   "link_type": "Report",
-   "link_to": "Expense Entry Summary",
-   "is_query_report": 1,
-   "hidden": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
    "label": "Income vs Expense Summary",
-   "link_type": "Report",
+   "link_count": 0,
    "link_to": "Income vs Expense Summary",
-   "is_query_report": 1,
-   "hidden": 0,
-   "onboard": 0
-  },
-  {
-   "type": "Link",
-   "label": "Currency Exposure Report",
    "link_type": "Report",
-   "link_to": "Currency Exposure Report",
-   "is_query_report": 1,
-   "hidden": 0,
-   "onboard": 0
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2026-05-14 00:00:00.000000",
+ "modified": "2026-06-22 17:14:34.553758",
  "modified_by": "Administrator",
  "module": "Personal Expense Tracker",
  "name": "Personal Expenses",
  "number_cards": [
   {
-   "number_card_name": "This Month Expenses",
-   "label": "This Month Expenses"
+   "label": "This Month Expenses",
+   "number_card_name": "This Month Expenses"
   },
   {
-   "number_card_name": "Today Expenses",
-   "label": "Today Expenses"
+   "label": "Today Expenses",
+   "number_card_name": "Today Expenses"
   },
   {
-   "number_card_name": "Top Category",
-   "label": "Top Category"
+   "label": "Top Category",
+   "number_card_name": "Top Category"
   },
   {
-   "number_card_name": "Budget Usage",
-   "label": "Budget Usage"
+   "label": "Budget Usage",
+   "number_card_name": "Budget Usage"
   },
   {
-   "number_card_name": "Remaining Budget",
-   "label": "Remaining Budget"
+   "label": "Remaining Budget",
+   "number_card_name": "Remaining Budget"
+  },
+  {
+   "label": "Income Used",
+   "number_card_name": "Income Used"
+  },
+  {
+   "label": "Income Left",
+   "number_card_name": "Income Left"
   }
  ],
  "owner": "Administrator",
@@ -182,52 +200,53 @@
  "sequence_id": 1.0,
  "shortcuts": [
   {
-   "type": "URL",
-   "url": "/expense-tracker",
-   "label": "Website Dashboard",
-   "color": "Cyan"
-  },
-  {
-   "type": "DocType",
-   "link_to": "Income Entry",
-   "label": "Income Entry",
+   "color": "Blue",
    "doc_view": "List",
-   "color": "Cyan"
-  },
-  {
-   "type": "DocType",
-   "link_to": "Expense Entry",
    "label": "Expense Entry",
-   "doc_view": "List",
-   "color": "Blue"
+   "link_to": "Expense Entry",
+   "type": "DocType"
   },
   {
-   "type": "DocType",
-   "link_to": "Expense Category",
+   "color": "Green",
+   "doc_view": "List",
    "label": "Expense Category",
-   "doc_view": "List",
-   "color": "Green"
+   "link_to": "Expense Category",
+   "type": "DocType"
   },
   {
-   "type": "DocType",
-   "link_to": "Monthly Budget",
+   "color": "Orange",
+   "doc_view": "List",
    "label": "Monthly Budget",
-   "doc_view": "List",
-   "color": "Orange"
+   "link_to": "Monthly Budget",
+   "type": "DocType"
   },
   {
-   "type": "DocType",
-   "link_to": "Budget Period",
-   "label": "Budget Period",
+   "color": "Purple",
    "doc_view": "List",
-   "color": "Yellow"
-  },
-  {
-   "type": "DocType",
-   "link_to": "Currency Exchange Rate",
    "label": "Currency Exchange Rate",
+   "link_to": "Currency Exchange Rate",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "",
+   "label": "Website Dashboard",
+   "type": "URL",
+   "url": "/expense-tracker"
+  },
+  {
+   "color": "Cyan",
    "doc_view": "List",
-   "color": "Purple"
+   "label": "Income Entry",
+   "link_to": "Income Entry",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "label": "Category Budget Dashboard",
+   "type": "URL",
+   "url": "/desk/category-budget-dashboard"
   }
  ],
  "title": "Personal Expenses",
